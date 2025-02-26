@@ -1,0 +1,9 @@
+services:
+  devhabit.api:
+    image: ${DOCKET_REGISTRY-}devhabitapi
+    build:
+      context: .
+      dockerfile: DevHabit.Api/Dockerfile
+    ports:
+      - 5000:8080
+      - 5001:8081
