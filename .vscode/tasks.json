@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/dev-habit.sln",
+                "${workspaceFolder}/DevHabit.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/dev-habit.sln",
+                "${workspaceFolder}/DevHabit.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/dev-habit.sln"
+                "${workspaceFolder}/DevHabit.sln"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -46,12 +46,12 @@
             "dockerBuild": {
                 "tag": "devhabit:dev",
                 "target": "base",
-                "dockerfile": "${workspaceFolder}/src/DevHabit.Api/Dockerfile",
+                "dockerfile": "${workspaceFolder}/DevHabit/DevHabit.Api/Dockerfile",
                 "context": "${workspaceFolder}",
                 "pull": true
             },
             "netCore": {
-                "appProject": "${workspaceFolder}/src/DevHabit.Api/DevHabit.Api.csproj"
+                "appProject": "${workspaceFolder}/DevHabit/DevHabit.Api/DevHabit.Api.csproj"
             }
         },
         {
@@ -62,7 +62,7 @@
             ],
             "dockerBuild": {
                 "tag": "devhabit:latest",
-                "dockerfile": "${workspaceFolder}/src/DevHabit.Api/Dockerfile",
+                "dockerfile": "${workspaceFolder}/DevHabit/DevHabit.Api/Dockerfile",
                 "context": "${workspaceFolder}",
                 "platform": {
                     "os": "linux",
@@ -71,7 +71,7 @@
                 "pull": true
             },
             "netCore": {
-                "appProject": "${workspaceFolder}/src/DevHabit.Api/DevHabit.Api.csproj"
+                "appProject": "${workspaceFolder}/DevHabit/DevHabit.Api/DevHabit.Api.csproj"
             }
         },
         {
@@ -82,7 +82,7 @@
             ],
             "dockerRun": {},
             "netCore": {
-                "appProject": "${workspaceFolder}/src/DevHabit.Api/DevHabit.Api.csproj",
+                "appProject": "${workspaceFolder}/DevHabit/DevHabit.Api/DevHabit.Api.csproj",
                 "enableDebugging": true
             }
         },
@@ -94,7 +94,7 @@
             ],
             "dockerRun": {},
             "netCore": {
-                "appProject": "${workspaceFolder}/src/DevHabit.Api/DevHabit.Api.csproj"
+                "appProject": "${workspaceFolder}/DevHabit/DevHabit.Api/DevHabit.Api.csproj"
             }
         }
     ]
