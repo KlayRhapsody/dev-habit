@@ -1,5 +1,7 @@
 # MJ Tech Pragmatic REST APIs - Dev Habit
 
+> 在此紀錄開發過程中遇到的問題與解決方案
+
 ### **在 .http 中遇到變數不支援 . 符號的問題**
 
 ```shell
@@ -64,3 +66,39 @@ ASPNETCORE_Kestrel__Certificates__Default__Password=123456
 程式中使用 UseHttpsRedirection 進行 Https 重新導向，需確認轉導的 Port 是否正確
 
 若未明確指定，則會讀取到環境變數所指定的 Port 導致轉導路徑錯誤
+
+
+### **動態方式載入 DbContext Configuration**
+
+在 DbContext 中使用 `ApplyConfigurationsFromAssembly` 方法，動態載入 DbContext Configuration
+
+有實作 `IEntityTypeConfiguration<TEntity>` 的 Configuration 類別，會自動被載入
+
+```csharp
+// ApplicationDbContext.cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+	modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+}
+
+// HabitsConfiguration.cs
+public sealed class HabitConfigurations : IEntityTypeConfiguration<Habit>
+{
+    public void Configure(EntityTypeBuilder<Habit> builder)
+    {
+        builder.HasKey(h => h.Id);
+
+        // ...
+    }
+}
+```
+
+
+### **Postgres 與 Api 容器啟動順序**
+
+在 docker-compose 中設定 postgres 與 api 服務，需確保 postgres 服務啟動完成後，api 服務才能正常啟動
+
+```yaml
+depends_on:
+  - devhabit.postgres
+```
