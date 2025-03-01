@@ -1,0 +1,38 @@
+using DevHabit.Api.Entities;
+
+namespace DevHabit.Api.DTOs.Habits;
+
+public sealed record HabitDto
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; } = string.Empty;
+    public string? Description { get; init; }
+    public required HabitType Type { get; init; }
+    public required FrequencyDto Frequency { get; init; }
+    public required TargetDto Target { get; init; }
+    public required HabitStatus Status { get; init; }
+    public required bool IsArchived { get; init; }
+    public DateOnly? EndedDate { get; init; }
+    public MilestoneDto? Milestone { get; init; }
+    public required DateTime CreatedAtUtc { get; init; }
+    public DateTime? UpdatedAtUtc { get; init; }
+    public DateTime? LastCompletedAtUtc { get; init; }
+}
+
+public sealed record FrequencyDto
+{
+    public FrequencyType Type { get; init; }
+    public int TimesPerPeriod { get; init; }
+}
+
+public sealed record TargetDto
+{
+    public int Value { get; init; }
+    public string Unit { get; init; }
+}
+
+public sealed record MilestoneDto
+{
+    public int Target { get; init; }
+    public int Current { get; init; }
+}
