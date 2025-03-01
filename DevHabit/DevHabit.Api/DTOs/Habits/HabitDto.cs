@@ -2,6 +2,12 @@ using DevHabit.Api.Entities;
 
 namespace DevHabit.Api.DTOs.Habits;
 
+public sealed record HabitCollectionDto
+{
+    public List<HabitDto> Data { get; init; }
+}
+
+
 public sealed record HabitDto
 {
     public required string Id { get; init; }
@@ -21,18 +27,18 @@ public sealed record HabitDto
 
 public sealed record FrequencyDto
 {
-    public FrequencyType Type { get; init; }
-    public int TimesPerPeriod { get; init; }
+    public required FrequencyType Type { get; init; }
+    public required int TimesPerPeriod { get; init; }
 }
 
 public sealed record TargetDto
 {
-    public int Value { get; init; }
-    public string Unit { get; init; }
+    public required int Value { get; init; }
+    public required string Unit { get; init; }
 }
 
 public sealed record MilestoneDto
 {
-    public int Target { get; init; }
-    public int Current { get; init; }
+    public required int Target { get; init; }
+    public required int Current { get; init; }
 }

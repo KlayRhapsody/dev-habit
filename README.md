@@ -102,3 +102,43 @@ public sealed class HabitConfigurations : IEntityTypeConfiguration<Habit>
 depends_on:
   - devhabit.postgres
 ```
+
+
+### **定義 DTO 類別時，複雜型別內部的屬性未定義 nullable、required 或標註 JsonRequired 導致 under-posting 問題**
+
+錯誤解釋：error S6964
+
+意思是：
+
+在 Controller Action 方法中作為輸入的值類型屬性（Value Type Property）應該是 nullable、required 或標註 [JsonRequired]，以避免 under-posting（未完整提供數據的問題）。
+
+* 值類型（int、bool、DateTime 等） 不能為 null，但如果客戶端在 POST 或 PUT 請求中省略這些屬性，ASP.NET Core 可能會使用預設值（如 0、false、DateTime.MinValue），導致數據不完整（under-posting）。
+* record 型別的 required 在 Model Binding 時 不會觸發 400 Bad Request，但 [Required] 會。
+* ASP.NET Core 不會自動檢測 required 是否缺少值，但 [JsonRequired] 可以在 JSON 反序列化時觸發錯誤。
+
+```csharp
+public sealed record HabitDto
+{
+    public required FrequencyDto Frequency { get; init; }
+    public required TargetDto Target { get; init; }
+    public MilestoneDto? Milestone { get; init; }
+}
+
+public sealed record FrequencyDto
+{
+    public required FrequencyType Type { get; init; }
+    public required int TimesPerPeriod { get; init; }
+}
+
+public sealed record TargetDto
+{
+    public required int Value { get; init; }
+    public required string Unit { get; init; }
+}
+
+public sealed record MilestoneDto
+{
+    public required int Target { get; init; }
+    public required int Current { get; init; }
+}
+```
