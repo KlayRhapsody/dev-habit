@@ -142,3 +142,13 @@ public sealed record MilestoneDto
     public required int Current { get; init; }
 }
 ```
+
+
+### **調整商業邏輯放置在擴充方法的幾種方式**
+
+1. 將 UpdateFromDto 擴充方法放置在 Habit Entity 類別中，封裝在 Domain Entity 內
+2. 創建一個專門的類別來代表 Update Use Case (推薦)
+    - 作者不喜歡命名為 Service，因為這樣可能會在之後放入更多不必要的程式碼，而複雜了原本簡單的 Use Case 商業操作
+3. 專用垂直分片
+
+
