@@ -152,3 +152,44 @@ public sealed record MilestoneDto
 3. 專用垂直分片
 
 
+### **在設計 Patch 操作時，需先仔細思考 Api 是否真有其必要提供 Patch 操作**
+
+* 可以使用 JsonPath 套件來實作 Patch 操作
+* 打破 RESTful API 規範的方式，使用 `PATCH /habits/{id}/archived` 的 Route 設計
+    - archived 是內部屬性 
+
+大部分的 API 設計不太會去使用到 Patch，抑或是會使用 Put 來取代 Patch 的操作
+
+### **在 Patch 驗證時，使用 ModelState.IsValid 會通過**
+
+在 Patch 操作中，使用 ModelState.IsValid 會通過驗證，但在 DB 操作時會出現 Not Null Violation 的錯誤
+
+```csharp
+// if (!ModelState.IsValid)
+// 調整為
+if (!TryValidateModel(habitDto))
+```
+
+使用 `ModelState.IsValid` 時錯誤訊息
+
+```shell
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Npgsql.PostgresException (0x80004005): 23502: null value in column "name" of relation "habits" violates not-null constraint
+```
+
+使用 `TryValidateModel` 時錯誤訊息
+
+```json
+// 第二種
+{
+    "errors": {
+        "Name": [
+            "The Name field is required."
+        ]
+    },
+    "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+    "title": "One or more validation errors occurred.",
+    "status": 400,
+    "traceId": "00-06050e25fe816538ec607496488f632f-6c7c2a418e809936-01"
+}
+```
