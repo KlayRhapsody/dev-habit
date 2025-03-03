@@ -193,3 +193,44 @@ Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving 
     "traceId": "00-06050e25fe816538ec607496488f632f-6c7c2a418e809936-01"
 }
 ```
+
+### **設定單一索引與複合索引語法**
+
+```csharp
+// 單一索引
+builder.HasIndex(t => t.Name).IsUnique();
+// 複合索引，即使目前只有一個屬性
+builder.HasIndex(t => new { t.Name }).IsUnique();
+```
+
+### **透過 Cli 方式新增 Migration**
+
+```shell
+dotnet ef migrations add Add_Habits -o Migrations/Application 
+dotnet ef migrations add Add_Tags -o Migrations/Application 
+```
+
+### **Create tag 邏輯可能會有 Race Condition 問題**
+
+以下創建邏輯會產生 Race Condition 問題，但在這裡透過 Db tags table 設定 Unique Index 來規避問題
+
+```csharp
+[HttpPost]
+public async Task<ActionResult<TagDto>> CreateTag(CreateTagDto createTagDto)
+{
+    Tag tag = createTagDto.ToEntity();
+
+    if (await dbContext.Tags.AnyAsync(t => t.Name == tag.Name))
+    {
+        return Conflict($"A tag with the same name: {tag.Name} already exists.");
+    }
+
+    dbContext.Tags.Add(tag);
+
+    await dbContext.SaveChangesAsync();
+
+    TagDto tagDto = tag.ToDto();
+
+    return CreatedAtAction(nameof(GetTag), new { id = tagDto.Id}, tagDto);
+}
+```
