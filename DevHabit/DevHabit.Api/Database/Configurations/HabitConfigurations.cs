@@ -24,5 +24,11 @@ public sealed class HabitConfigurations : IEntityTypeConfiguration<Habit>
         });
 
         builder.OwnsOne(h => h.Milestone);
+
+        // 讓 EF Core 知道 Habit 和 Tag 的關係應該透過 HabitTag 來處理
+        // 而不是直接讓 EF Core 自動建立一張隱藏的關聯表。
+        builder.HasMany(h => h.Tags)
+            .WithMany()
+            .UsingEntity<HabitTag>();
     }
 }
