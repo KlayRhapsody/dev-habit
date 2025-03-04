@@ -234,3 +234,12 @@ public async Task<ActionResult<TagDto>> CreateTag(CreateTagDto createTagDto)
     return CreatedAtAction(nameof(GetTag), new { id = tagDto.Id}, tagDto);
 }
 ```
+
+
+### **`aspire-dashboard` Image 使用注意事項**
+
+該服務會使用到 ASP.NET Core DataProtection，若啟動容器時未持久化 DataProtection-Keys，則在下一次容器啟動後，原本開啟的瀏覽器客端會無法讀取 Trace 與 Metrics 資訊，必須重開瀏覽器 (或清除 Cookies) 才能正常讀取
+
+```shell
+Unhandled exception rendering component: The key {f93a3761-8570-4693-9eaa-cb8800397a8d} was not found in the key ring.
+```
