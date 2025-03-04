@@ -29,7 +29,7 @@ public sealed class HabitTagsController(ApplicationDbContext dbContext) : Contro
         var currentTagIds = habit.HabitTags.Select(ht => ht.TagId).ToHashSet();
         if (currentTagIds.SetEquals(upsertHabitTagsDto.TagIds))
         {
-            return NotFound();
+            return NoContent();
         }
 
         List<string> existTagIds = await dbContext.Tags
