@@ -8,6 +8,7 @@ using DevHabit.Api.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevHabit.Api.Controllers;
@@ -55,7 +56,7 @@ public sealed class TagsController(ApplicationDbContext dbContext) : ControllerB
         ValidationResult validationResult = await validator.ValidateAsync(createTagDto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.ToDictionary());
+            return ValidationProblem(new ValidationProblemDetails(validationResult.ToDictionary()));
         }
 
         Tag tag = createTagDto.ToEntity();
