@@ -281,3 +281,13 @@ Unhandled exception rendering component: The key {f93a3761-8570-4693-9eaa-cb8800
     "traceId": "00-ad2310d80c3ac6954d94f0e08e227be5-1927c9863b4c1e06-01"
 }
 ```
+
+### **錯誤回應方法與類型**
+
+| **方法** | **適用情境** | **回應格式** | **是否包含 `errors`** |
+|----------|-------------|--------------|-----------------|
+| `Problem()` | 一般 API 錯誤 (`500`, `403`, `404`) | `ProblemDetails` | ❌ |
+| `ProblemDetails` | 任何錯誤訊息的標準格式 | `ProblemDetails` | ❌ |
+| `BadRequest()` | 400 錯誤（可回應 `string` 或 `ProblemDetails`） | `string` 或 `ProblemDetails` | ❌ |
+| `ValidationProblem()` | Model 驗證錯誤 (`ModelState`, `FluentValidation`) | `ValidationProblemDetails` | ✅ |
+| `ValidationProblemDetails` | 表單/輸入驗證錯誤 | `ValidationProblemDetails` | ✅ |

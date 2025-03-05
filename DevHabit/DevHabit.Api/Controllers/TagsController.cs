@@ -67,7 +67,9 @@ public sealed class TagsController(ApplicationDbContext dbContext) : ControllerB
 
         if (await dbContext.Tags.AnyAsync(t => t.Name == tag.Name))
         {
-            return Conflict($"A tag with the same name: {tag.Name} already exists.");
+            return Problem(
+                detail: $"A tag with the same name: {tag.Name} already exists.",
+                statusCode: StatusCodes.Status409Conflict);
         }
 
         dbContext.Tags.Add(tag);
