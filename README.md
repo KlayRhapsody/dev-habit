@@ -282,6 +282,7 @@ Unhandled exception rendering component: The key {f93a3761-8570-4693-9eaa-cb8800
 }
 ```
 
+
 ### **錯誤回應方法與類型**
 
 | **方法** | **適用情境** | **回應格式** | **是否包含 `errors`** |
@@ -291,3 +292,65 @@ Unhandled exception rendering component: The key {f93a3761-8570-4693-9eaa-cb8800
 | `BadRequest()` | 400 錯誤（可回應 `string` 或 `ProblemDetails`） | `string` 或 `ProblemDetails` | ❌ |
 | `ValidationProblem()` | Model 驗證錯誤 (`ModelState`, `FluentValidation`) | `ValidationProblemDetails` | ✅ |
 | `ValidationProblemDetails` | 表單/輸入驗證錯誤 | `ValidationProblemDetails` | ✅ |
+
+
+
+### **發生 Race Condition 問題時，回應的錯誤訊息**
+
+從下列資訊中可以看出暴露太細節的錯誤資訊給客端，可能會導致安全性問題
+
+```json
+{
+    "type": "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+    "title": "Microsoft.EntityFrameworkCore.DbUpdateException",
+    "status": 500,
+    "detail": "An error occurred while saving the entity changes. See the inner exception for details.",
+    "traceId": "00-c81a43d5e3d9dfaf3a14b5cbd0001d04-b408e8bd85d59591-01",
+    "requestId": "0HNARP16GEF9J:00000001",
+    "exception": {
+        "valueKind": 1
+    }
+}
+```
+
+拿掉以下註冊的服務會讓錯誤格式變回 `text/plain` 且暴露更多資訊
+
+```csharp
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
+    };
+});
+```
+
+```text
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "ix_tags_name"
+
+DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+```
+
+透過實現 IExceptionHandler 介面來自訂錯誤回應格式
+
+```json
+{
+    "type": "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+    "title": "Internal Server Error",
+    "status": 500,
+    "detail": "An unhandled exception occurred while processing the request. Please try again later.",
+    "traceId": "00-4738a58d211f1e2aa99a8af451427f7c-4ce0550b7605be31-01",
+    "requestId": "0HNARP7LBIOFK:00000001"
+}
+```
+
+### **註冊 ExceptionHandler 有順序性問題**
+
+先註冊的會先執行
+
+```csharp
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+```

@@ -54,6 +54,7 @@ public sealed class TagsController(ApplicationDbContext dbContext) : ControllerB
         IValidator<CreateTagDto> validator,
         ProblemDetailsFactory problemDetailsFactory)
     {
+        // await validator.ValidateAndThrowAsync(createTagDto);
         ValidationResult validationResult = await validator.ValidateAsync(createTagDto);
         if (!validationResult.IsValid)
         {
