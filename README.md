@@ -243,3 +243,41 @@ public async Task<ActionResult<TagDto>> CreateTag(CreateTagDto createTagDto)
 ```shell
 Unhandled exception rendering component: The key {f93a3761-8570-4693-9eaa-cb8800397a8d} was not found in the key ring.
 ```
+
+
+### **請求屬性驗證**
+
+`[ApiController]` 屬性本身內建了基本的 ModelState.IsValid 驗證
+
+當有 required 欄位卻帶 null 時，會自動回傳 400 Bad Request 且 problem detail 回應內容
+
+```json
+{
+    "errors": {
+        "Name": [
+            "The Name field is required."
+        ]
+    },
+    "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+    "title": "One or more validation errors occurred.",
+    "status": 400,
+    "traceId": "00-af76bc87e8240a8325d0cfadbd94e049-c73a95ed1ee8345b-01"
+}
+```
+
+可以在欄位上使用簡單的 DataAnnotations 屬性來設定驗證規則，以下為複數錯誤回應內容
+
+```json
+{
+    "errors": {
+        "Name": [
+            "The Name field is required.",
+            "The field Name must be a string or array type with a minimum length of '3'."
+        ]
+    },
+    "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+    "title": "One or more validation errors occurred.",
+    "status": 400,
+    "traceId": "00-ad2310d80c3ac6954d94f0e08e227be5-1927c9863b4c1e06-01"
+}
+```
