@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using DevHabit.Api.Database;
+using DevHabit.Api.DTOs;
 using DevHabit.Api.DTOs.Habits;
 using DevHabit.Api.Entities;
 using FluentValidation;
@@ -15,9 +16,17 @@ namespace DevHabit.Api.Controllers;
 public sealed class HabitsController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<HabitCollectionDto>> GetHabits()
+    public async Task<ActionResult<HabitCollectionDto>> GetHabits([FromQuery] HabitsQueryParameters query)
     {
+        query.Search = query.Search?.Trim().ToLower();
+        string pattern = $"%{query.Search}%";
+
         List<HabitDto> habits = await dbContext.Habits
+            .Where(h => query.Search == null ||
+                EF.Functions.Like(h.Name.ToLower(), pattern) ||
+                h.Description != null && EF.Functions.Like(h.Description.ToLower(), pattern))
+            .Where(h => query.Type == null || h.Type == query.Type)
+            .Where(h => query.Status == null || h.Status == query.Status)
             .Select(HabitQueries.ProjectToDto())
             .ToListAsync();
 

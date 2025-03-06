@@ -9,7 +9,7 @@ public sealed class CreateHabitDtoValidator : AbstractValidator<CreateHabitDto>
     [
         // 分鐘、小時、步數、公里、卡路里、頁數、書本數、任務數、會話數
         "minutes", "hours", "steps", "km", "cal", 
-        "pages", "books", "tasks", "sesstions"
+        "pages", "books", "tasks", "sessions"
     ];
 
     private static readonly string[] AllowedUnitsForBinaryHabits = ["sessions", "tasks"];

@@ -354,3 +354,69 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 ```
+
+
+### **自身電腦重啟後額外遇到的 8080 Port 被佔用問題**
+
+檢查是否有其他服務佔用 8080 Port
+
+```shell
+lsof -i :8080
+```
+
+發現是 java process 且 kill -9 砍掉後會自動重啟
+
+確定 Java 進程的詳細資訊，發現是 Zookeeper 服務啟用
+
+```shell
+ps -fp {PID}
+```
+
+列出 brew services 並停止 Zookeeper 服務
+
+```shell
+brew services list
+brew services stop zookeeper
+```
+
+
+### **Supporting Searching and Filtering 課程**
+
+Supporting Searching and Filtering 課程中使用到的判斷語法看起來沒有功用，search null 才會執行右邊的運算，但是 search 本身就是 null，所以右邊的運算不會執行
+
+```csharp
+search ??= search?.Trim().ToLower();
+
+// 調整為
+search = search?.Trim().ToLower();
+``` 
+
+另外以下語法會產生以下警告
+
+```csharp
+query = query.Where(h => h.Name.ToLower().Contains(search) ||
+    h.Description != null && h.Description.ToLower().Contains(search));
+```
+
+警告訊息
+
+建議採用 'StringComparison' 列舉值之 'string.Contains(string)' 的字串比較方法多載，以執行不區分大小寫的比較，但請注意，這可能會導致行為發生輕微變更，因此請務必在套用建議之後進行全面測試，或者如果不需要文化相關比較，請考慮使用 'StringComparison.OrdinalIgnoreCase'CA1862
+
+在調整成建議的作法後
+
+```csharp
+query = query.Where(h => h.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase) ||
+    h.Description != null && h.Description.Contains(search, StringComparison.CurrentCultureIgnoreCase));
+```
+
+執行會遇到以下錯誤，看起來是 EF Core 不認得 StringComparison.CurrentCultureIgnoreCase 的問題
+
+```
+The LINQ expression 'DbSet<Habit>()
+    .Where(h => h.Name.Contains(
+        value: __search_0, 
+        comparisonType: CurrentCultureIgnoreCase) || h.Description != null && h.Description.Contains(
+        value: __search_0, 
+        comparisonType: CurrentCultureIgnoreCase))' could not be translated. Additional information: Translation of method 'string.Contains' failed. If this method can be mapped to your custom function, see https://go.microsoft.com/fwlink/?linkid=2132413 for more information.
+Translation of method 'string.Contains' failed. If this method can be mapped to your custom function, see https://go.microsoft.com/fwlink/?linkid=2132413 for more information. Either rewrite the query in a form that can be translated, or switch to client evaluation explicitly by inserting a call to 'AsEnumerable', 'AsAsyncEnumerable', 'ToList', or 'ToListAsync'. See https://go.microsoft.com/fwlink/?linkid=2101038 for more information.
+```
