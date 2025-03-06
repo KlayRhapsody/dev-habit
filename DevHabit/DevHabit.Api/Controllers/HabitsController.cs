@@ -21,12 +21,23 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
         query.Search = query.Search?.Trim().ToLower();
         string pattern = $"%{query.Search}%";
 
+        Expression<Func<Habit, string>> orderBy = query.Sort switch
+        {
+            "name" => h => h.Name,
+            "description" => h => h.Description,
+            "type" => h => h.Type.ToString(),
+            "status" => h => h.Status.ToString(),
+            _ => h => h.Name
+        };
+
         List<HabitDto> habits = await dbContext.Habits
             .Where(h => query.Search == null ||
                 EF.Functions.Like(h.Name.ToLower(), pattern) ||
                 h.Description != null && EF.Functions.Like(h.Description.ToLower(), pattern))
             .Where(h => query.Type == null || h.Type == query.Type)
             .Where(h => query.Status == null || h.Status == query.Status)
+            .OrderBy(orderBy)
+            .ThenBy(h => h.CreatedAtUtc)
             .Select(HabitQueries.ProjectToDto())
             .ToListAsync();
 
