@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DevHabit.Api.Services.Sorting;
 using OpenTelemetry.Trace;
+using DevHabit.Api.DTOs.Common;
 
 namespace DevHabit.Api.Controllers;
 
@@ -19,7 +20,7 @@ namespace DevHabit.Api.Controllers;
 public sealed class HabitsController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<HabitCollectionDto>> GetHabits(
+    public async Task<ActionResult<PaginationResult<HabitDto>>> GetHabits(
         [FromQuery] HabitsQueryParameters query,
         SortMappingProvider sortMappingProvider)
     {
@@ -35,22 +36,19 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
 
         SortMapping[] sortMapping = sortMappingProvider.GetMappings<HabitDto, Habit>();
 
-        List<HabitDto> habits = await dbContext.Habits
+        IQueryable<HabitDto> habitsQuery = dbContext.Habits
             .Where(h => query.Search == null ||
                 EF.Functions.Like(h.Name.ToLower(), pattern) ||
                 h.Description != null && EF.Functions.Like(h.Description.ToLower(), pattern))
             .Where(h => query.Type == null || h.Type == query.Type)
             .Where(h => query.Status == null || h.Status == query.Status)
             .ApplySort(query.Sort, sortMapping)
-            .Select(HabitQueries.ProjectToDto())
-            .ToListAsync();
+            .Select(HabitQueries.ProjectToDto());
 
-        HabitCollectionDto habitCollection = new()
-        {
-            Data = habits
-        };
+        PaginationResult<HabitDto> paginationResult = 
+            await PaginationResult<HabitDto>.CreateAsync(habitsQuery, query.Page, query.PageSize);
 
-        return Ok(habitCollection);
+        return Ok(paginationResult);
     }
 
     [HttpGet("{id}")]

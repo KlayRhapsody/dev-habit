@@ -26,7 +26,7 @@ public sealed class TagsController(ApplicationDbContext dbContext) : ControllerB
 
         TagCollectionDto tagCollectionDto = new()
         {
-            Data = tags
+            Item = tags
         };
 
         return Ok(tagCollectionDto);
