@@ -34,6 +34,13 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
                 detail: $"The provided sort parameter isn't valid: '{query.Sort}'");
         }
 
+        if (!dataShapingService.Validate<Habit>(query.Fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"The provided fields parameter isn't valid: '{query.Fields}'");
+        }
+
         query.Search = query.Search?.Trim().ToLower();
 
         SortMapping[] sortMapping = sortMappingProvider.GetMappings<HabitDto, Habit>();

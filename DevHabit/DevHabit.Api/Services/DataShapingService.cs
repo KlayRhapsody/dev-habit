@@ -46,4 +46,23 @@ public sealed class DataShapingService
 
         return shapedObjects;
     }
+
+    public bool Validate<T>(string? fields)
+    {
+        if (string.IsNullOrWhiteSpace(fields))
+        {
+            return true;
+        }
+
+        HashSet<string> fieldSet = fields
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(f => f.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
+
+        PropertyInfo[] propertyInfos = PropertiesCache.GetOrAdd(
+            typeof(T), 
+            t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+
+        return fieldSet.All(f => propertyInfos.Any(p => p.Name.Equals(f, StringComparison.OrdinalIgnoreCase)));
+    }
 }
