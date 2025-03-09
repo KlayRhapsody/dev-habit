@@ -321,6 +321,9 @@ dotnet_diagnostic.CA1848.severity = none
 # CA1860: Avoid using 'Enumerable.Any()' extension method
 dotnet_diagnostic.CA1860.severity = none
 
+# CA1862: 使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較
+dotnet_diagnostic.CA1862.severity = suggestion
+
 # CA2007: Consider calling ConfigureAwait on the awaited task
 dotnet_diagnostic.CA2007.severity = none
 

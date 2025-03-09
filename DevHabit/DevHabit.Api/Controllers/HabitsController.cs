@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using DevHabit.Api.Services.Sorting;
 using OpenTelemetry.Trace;
 using DevHabit.Api.DTOs.Common;
+using DevHabit.Api.Services;
+using System.Dynamic;
 
 namespace DevHabit.Api.Controllers;
 
@@ -20,9 +22,10 @@ namespace DevHabit.Api.Controllers;
 public sealed class HabitsController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<PaginationResult<HabitDto>>> GetHabits(
+    public async Task<IActionResult> GetHabits(
         [FromQuery] HabitsQueryParameters query,
-        SortMappingProvider sortMappingProvider)
+        SortMappingProvider sortMappingProvider,
+        DataShapingService dataShapingService)
     {
         if (!sortMappingProvider.ValidateMappings<HabitDto, Habit>(query.Sort))
         {
@@ -32,21 +35,31 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
         }
 
         query.Search = query.Search?.Trim().ToLower();
-        string pattern = $"%{query.Search}%";
 
         SortMapping[] sortMapping = sortMappingProvider.GetMappings<HabitDto, Habit>();
 
         IQueryable<HabitDto> habitsQuery = dbContext.Habits
             .Where(h => query.Search == null ||
-                EF.Functions.Like(h.Name.ToLower(), pattern) ||
-                h.Description != null && EF.Functions.Like(h.Description.ToLower(), pattern))
+                h.Name.ToLower().Contains(query.Search) ||
+                h.Description != null && h.Description.ToLower().Contains(query.Search))
             .Where(h => query.Type == null || h.Type == query.Type)
             .Where(h => query.Status == null || h.Status == query.Status)
             .ApplySort(query.Sort, sortMapping)
             .Select(HabitQueries.ProjectToDto());
 
-        PaginationResult<HabitDto> paginationResult = 
-            await PaginationResult<HabitDto>.CreateAsync(habitsQuery, query.Page, query.PageSize);
+        int totalCount = await habitsQuery.CountAsync();
+        List<HabitDto> items = await habitsQuery
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
+            .ToListAsync();
+
+        var paginationResult = new PaginationResult<ExpandoObject>
+        {
+            Item = dataShapingService.ShapeCollectionData(items, query.Fields),
+            Page = query.Page,
+            PageSize = query.PageSize,
+            TotalCount = totalCount
+        };
 
         return Ok(paginationResult);
     }
