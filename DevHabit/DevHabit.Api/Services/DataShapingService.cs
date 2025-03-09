@@ -12,6 +12,34 @@ public sealed class DataShapingService
 {
     private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertiesCache = new(); 
 
+    public ExpandoObject ShapeData<T>(T entity, string? fields)
+    {
+        HashSet<string> fieldSet = fields?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(f => f.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
+
+        PropertyInfo[] propertyInfos = PropertiesCache.GetOrAdd(
+            typeof(T), 
+            t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+
+        if (fieldSet.Any())
+        {
+            propertyInfos = propertyInfos
+                .Where(p => fieldSet.Contains(p.Name))
+                .ToArray();
+        }
+
+        IDictionary<string, object?> shapedObject = new ExpandoObject();
+
+        foreach (PropertyInfo propertyInfo in propertyInfos)
+        {
+            shapedObject[propertyInfo.Name] = propertyInfo.GetValue(entity);
+        }
+
+        return (ExpandoObject) shapedObject;
+    }
+
     public List<ExpandoObject> ShapeCollectionData<T>(IEnumerable<T> entities, string? fields)
     {
         HashSet<string> fieldSet = fields?

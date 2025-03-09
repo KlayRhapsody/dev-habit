@@ -72,8 +72,18 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<HabitWithTagsDto>> GetHabit(string id)
+    public async Task<IActionResult> GetHabit(
+        string id,
+        string? fields,
+        DataShapingService dataShapingService)
     {
+        if (!dataShapingService.Validate<HabitWithTagsDto>(fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"The provided fields parameter isn't valid: '{fields}'");
+        }
+
         HabitWithTagsDto habit = await dbContext.Habits
             .Where(h => h.Id == id)
             .Select(HabitQueries.ProjectToDtoWithTags())
@@ -84,7 +94,9 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
             return NotFound();
         }
 
-        return Ok(habit);
+        ExpandoObject expandoObject = dataShapingService.ShapeData(habit, fields);
+
+        return Ok(expandoObject);
     }
 
     [HttpPost]

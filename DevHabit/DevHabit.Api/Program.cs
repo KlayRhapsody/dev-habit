@@ -9,6 +9,7 @@ using DevHabit.Api.Services.Sorting;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Newtonsoft.Json.Serialization;
 using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -21,7 +22,10 @@ builder.Services.AddControllers(options =>
 {
     options.ReturnHttpNotAcceptable = true;
 })
-.AddNewtonsoftJson()
+.AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+})
 .AddXmlSerializerFormatters();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
