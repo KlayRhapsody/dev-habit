@@ -96,7 +96,7 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
 
         ExpandoObject expandoObject = dataShapingService.ShapeData(habit, fields);
 
-        LinkDto[] links = CreateLinksForHabit(id, fields);
+        List<LinkDto> links = CreateLinksForHabit(id, fields);
         expandoObject.TryAdd("links", links);
 
         return Ok(expandoObject);
@@ -116,6 +116,7 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
         await dbContext.SaveChangesAsync();
 
         HabitDto habitDto = habit.ToDto();
+        habitDto.Links = CreateLinksForHabit(habitDto.Id, null);
 
         return CreatedAtAction(nameof(GetHabit), new { id = habitDto.Id }, habitDto);   
     }
@@ -183,7 +184,7 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
         return NoContent();
     }
 
-    private LinkDto[] CreateLinksForHabit(string id, string? fields)
+    private List<LinkDto> CreateLinksForHabit(string id, string? fields)
     {
         return 
         [
