@@ -1,3 +1,4 @@
+using DevHabit.Api.DTOs;
 using DevHabit.Api.DTOs.Common;
 
 namespace DevHabit.Api.Services;
