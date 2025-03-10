@@ -19,9 +19,8 @@ using Asp.Versioning;
 namespace DevHabit.Api.Controllers;
 
 [ApiController]
-[Route("/v{version:apiVersion}/habits")]
+[Route("habits")]
 [ApiVersion("1.0")]
-[ApiVersion("2.0")]
 public sealed class HabitsController(ApplicationDbContext dbContext, LinkService linkService) : ControllerBase
 {
     [HttpGet]
@@ -123,7 +122,7 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
         return Ok(expandoObject);
     }
 
-    [MapToApiVersion("2.0")]
+    [ApiVersion("2.0")]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetHabitV2(
         string id,
