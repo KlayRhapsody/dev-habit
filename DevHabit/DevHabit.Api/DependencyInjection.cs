@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Asp.Versioning;
 using DevHabit.Api.Database;
 using DevHabit.Api.DTOs.Habits;
 using DevHabit.Api.Entities;
@@ -24,7 +25,7 @@ namespace DevHabit.Api;
 
 public static class DependencyInjection
 {
-    public static WebApplicationBuilder AddController(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddApiServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddControllers(options =>
         {
@@ -44,6 +45,18 @@ public static class DependencyInjection
 
             formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.HateoasJson);
         });
+
+        builder.Services
+            .AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1.0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionSelector = new CurrentImplementationApiVersionSelector(options);
+
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            })
+            .AddMvc();
 
         builder.Services.AddOpenApi();
 

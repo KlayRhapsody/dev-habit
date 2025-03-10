@@ -14,11 +14,14 @@ using OpenTelemetry.Trace;
 using DevHabit.Api.DTOs.Common;
 using DevHabit.Api.Services;
 using System.Dynamic;
+using Asp.Versioning;
 
 namespace DevHabit.Api.Controllers;
 
 [ApiController]
-[Route("habits")]
+[Route("/v{version:apiVersion}/habits")]
+[ApiVersion("1.0")]
+[ApiVersion("2.0")]
 public sealed class HabitsController(ApplicationDbContext dbContext, LinkService linkService) : ControllerBase
 {
     [HttpGet]
@@ -83,6 +86,7 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
         return Ok(paginationResult);
     }
 
+    [MapToApiVersion("1.0")]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetHabit(
         string id,
@@ -91,16 +95,53 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
         string? accept,
         DataShapingService dataShapingService)
     {
-        if (!dataShapingService.Validate<HabitWithTagsDto>(fields))
+        if (!dataShapingService.Validate<HabitWithTagsDtoV1>(fields))
         {
             return Problem(
                 statusCode: StatusCodes.Status400BadRequest,
                 detail: $"The provided fields parameter isn't valid: '{fields}'");
         }
 
-        HabitWithTagsDto habit = await dbContext.Habits
+        HabitWithTagsDtoV1 habit = await dbContext.Habits
             .Where(h => h.Id == id)
-            .Select(HabitQueries.ProjectToDtoWithTags())
+            .Select(HabitQueries.ProjectToDtoWithTagsV1())
+            .FirstOrDefaultAsync();
+
+        if (habit is null)
+        {
+            return NotFound();
+        }
+
+        ExpandoObject expandoObject = dataShapingService.ShapeData(habit, fields);
+
+        if (accept == CustomMediaTypeNames.Application.HateoasJson)
+        {
+            List<LinkDto> links = CreateLinksForHabit(id, fields);
+            expandoObject.TryAdd("links", links);
+        }
+
+        return Ok(expandoObject);
+    }
+
+    [MapToApiVersion("2.0")]
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetHabitV2(
+        string id,
+        string? fields,
+        [FromHeader(Name = "Accept")]
+        string? accept,
+        DataShapingService dataShapingService)
+    {
+        if (!dataShapingService.Validate<HabitWithTagsDtoV2>(fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"The provided fields parameter isn't valid: '{fields}'");
+        }
+
+        HabitWithTagsDtoV2 habit = await dbContext.Habits
+            .Where(h => h.Id == id)
+            .Select(HabitQueries.ProjectToDtoWithTagsV2())
             .FirstOrDefaultAsync();
 
         if (habit is null)
