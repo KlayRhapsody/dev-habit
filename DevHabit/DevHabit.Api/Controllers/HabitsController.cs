@@ -19,7 +19,7 @@ namespace DevHabit.Api.Controllers;
 
 [ApiController]
 [Route("habits")]
-public sealed class HabitsController(ApplicationDbContext dbContext) : ControllerBase
+public sealed class HabitsController(ApplicationDbContext dbContext, LinkService linkService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetHabits(
@@ -95,6 +95,9 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
         }
 
         ExpandoObject expandoObject = dataShapingService.ShapeData(habit, fields);
+
+        LinkDto[] links = CreateLinksForHabit(id, fields);
+        expandoObject.TryAdd("links", links);
 
         return Ok(expandoObject);
     }
@@ -178,5 +181,16 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
         await dbContext.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    private LinkDto[] CreateLinksForHabit(string id, string? fields)
+    {
+        return 
+        [
+            linkService.Create(nameof(GetHabit), "self", HttpMethods.Get, new { id, fields }),
+            linkService.Create(nameof(UpdateHabit), "update", HttpMethods.Put, new { id }),
+            linkService.Create(nameof(PatchHabit), "partial_update", HttpMethods.Patch, new { id }),
+            linkService.Create(nameof(DeleteHabit), "delete", HttpMethods.Delete, new { id })
+        ];
     }
 }

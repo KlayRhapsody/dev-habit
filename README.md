@@ -420,3 +420,18 @@ The LINQ expression 'DbSet<Habit>()
         comparisonType: CurrentCultureIgnoreCase))' could not be translated. Additional information: Translation of method 'string.Contains' failed. If this method can be mapped to your custom function, see https://go.microsoft.com/fwlink/?linkid=2132413 for more information.
 Translation of method 'string.Contains' failed. If this method can be mapped to your custom function, see https://go.microsoft.com/fwlink/?linkid=2132413 for more information. Either rewrite the query in a form that can be translated, or switch to client evaluation explicitly by inserting a call to 'AsEnumerable', 'AsAsyncEnumerable', 'ToList', or 'ToListAsync'. See https://go.microsoft.com/fwlink/?linkid=2101038 for more information.
 ```
+
+
+### **使用 HttpContext 前請先註冊該服務**
+
+當服務中有依賴 IHttpContextAccessor 時，需要先註冊該服務，否則會出現以下錯誤
+
+```log
+---> System.InvalidOperationException: Unable to resolve service for type 'Microsoft.AspNetCore.Http.IHttpContextAccessor' while attempting to activate 'DevHabit.Api.Services.LinkService'.
+```
+
+註冊 IHttpContextAccessor 服務
+
+```csharp
+builder.Services.AddHttpContextAccessor();
+```

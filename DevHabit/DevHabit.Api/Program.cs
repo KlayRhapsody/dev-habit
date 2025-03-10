@@ -11,7 +11,6 @@ builder
     .AddObservability()
     .AddApplicationServices();
     
-
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
