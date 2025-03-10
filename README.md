@@ -435,3 +435,58 @@ Translation of method 'string.Contains' failed. If this method can be mapped to 
 ```csharp
 builder.Services.AddHttpContextAccessor();
 ```
+
+
+### **Custom Media Type**
+
+```shell
+application/vnd.dev-habit.hateoas+json
+```
+
+對應的結構說明
+
+| 組成部分 | 說明 | 對應內容 |
+|-----------|--------------------------|--------------------------------|
+| **Top-level type** | 主要類型，表示這是應用程式數據 | `application` |
+| **Vendor** | 使用 `vnd.` 表示這是一個 **自定義的(廠商專用)** 媒體類型 | `vnd.` |
+| **Vendor ID** | 廠商識別名稱，通常用來標識開發組織或專案 | `dev-habit` |
+| **Media type** | 特定的媒體類型名稱，描述這種數據的用途或格式 | `hateoas` |
+| **Suffix** | 這個媒體類型的底層格式 | `+json` |
+
+
+## **`[Consumes]`**
+- **控制 API 可接受的請求格式（`Content-Type`）**
+- 確保客戶端傳遞的資料格式符合 API 的要求
+- 常見的 `Content-Type`：
+  - `application/json`
+  - `application/xml`
+  - `multipart/form-data`（用於上傳文件）
+
+使用範例：限制 `POST` API 只接受 JSON
+
+```csharp
+[HttpPost]
+[Consumes("application/json")]
+public IActionResult CreateItem([FromBody] ItemDto item)
+{
+    return Ok(item);
+}
+```
+
+
+### **`[Produces]`**
+- **控制 API 回應的格式（`Content-Type`）**
+- 指定 API **應回應的 MIME 類型**
+- 確保客戶端收到的格式符合 API 設計
+
+使用範例：限制 API 只能回應 JSON
+
+```csharp
+[HttpGet]
+[Produces("application/json")]
+public IActionResult GetItem()
+{
+    var item = new ItemDto { Id = 1, Name = "Item1" };
+    return Ok(item);
+}
+```

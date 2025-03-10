@@ -60,20 +60,25 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
             .Take(query.PageSize)
             .ToListAsync();
 
+        bool includeLinks = query.Accept == CustomMediaTypeNames.Application.HateoasJson;
         var paginationResult = new PaginationResult<ExpandoObject>
         {
             Item = dataShapingService.ShapeCollectionData(
                 items,
                 query.Fields,
-                h => CreateLinksForHabit(h.Id, query.Fields)),
+                h => includeLinks ? CreateLinksForHabit(h.Id, query.Fields) : null),
             Page = query.Page,
             PageSize = query.PageSize,
             TotalCount = totalCount,
         };
-        paginationResult.Links = CreateLinksForHabits(
-            query, 
-            paginationResult.HasPreviousPage, 
-            paginationResult.HasNextPage);
+
+        if (includeLinks)
+        {
+            paginationResult.Links = CreateLinksForHabits(
+                query, 
+                paginationResult.HasPreviousPage, 
+                paginationResult.HasNextPage);
+        }
 
         return Ok(paginationResult);
     }
@@ -82,6 +87,8 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
     public async Task<IActionResult> GetHabit(
         string id,
         string? fields,
+        [FromHeader(Name = "Accept")]
+        string? accept,
         DataShapingService dataShapingService)
     {
         if (!dataShapingService.Validate<HabitWithTagsDto>(fields))
@@ -103,8 +110,11 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
 
         ExpandoObject expandoObject = dataShapingService.ShapeData(habit, fields);
 
-        List<LinkDto> links = CreateLinksForHabit(id, fields);
-        expandoObject.TryAdd("links", links);
+        if (accept == CustomMediaTypeNames.Application.HateoasJson)
+        {
+            List<LinkDto> links = CreateLinksForHabit(id, fields);
+            expandoObject.TryAdd("links", links);
+        }
 
         return Ok(expandoObject);
     }
