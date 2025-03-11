@@ -11,6 +11,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Tag> Tags { get; set; }
 
     public DbSet<HabitTag> HabitTags { get; set; }
+
+    public DbSet<User> Users { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

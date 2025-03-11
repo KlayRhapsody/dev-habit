@@ -4,7 +4,7 @@ namespace DevHabit.Api.DTOs.Common;
 
 public sealed record PaginationResult<T> : ICollectionResponse<T>, ILinksResponse
 {
-    public List<T> Item { get; init; }
+    public List<T> Items { get; init; }
 
     public int Page { get; init; }
 
@@ -30,7 +30,7 @@ public sealed record PaginationResult<T> : ICollectionResponse<T>, ILinksRespons
 
         return new PaginationResult<T>
         {
-            Item = items,
+            Items = items,
             Page = page,
             PageSize = PageSize,
             TotalCount = totalCount

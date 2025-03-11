@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using DevHabit.Api.Database;
+using DevHabit.Api.DTOs.Common;
 using DevHabit.Api.DTOs.Tags;
 using DevHabit.Api.Entities;
+using DevHabit.Api.Services;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +19,15 @@ namespace DevHabit.Api.Controllers;
 
 [ApiController]
 [Route("tags")]
-public sealed class TagsController(ApplicationDbContext dbContext) : ControllerBase
+[Produces(
+    MediaTypeNames.Application.Json,
+    CustomMediaTypeNames.Application.JsonV1,
+    CustomMediaTypeNames.Application.HateoasJson,
+    CustomMediaTypeNames.Application.HateoasJsonV1)]
+public sealed class TagsController(ApplicationDbContext dbContext, LinkService linkService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<TagCollectionDto>> GetTags()
+    public async Task<ActionResult<TagCollectionDto>> GetTags([FromHeader] AcceptHeaderDto acceptHeader)
     {
         List<TagDto> tags = await dbContext.Tags
             .Select(TagQueries.ProjectToDto())
@@ -26,14 +35,21 @@ public sealed class TagsController(ApplicationDbContext dbContext) : ControllerB
 
         TagCollectionDto tagCollectionDto = new()
         {
-            Item = tags
+            Items = tags
         };
+
+        if (acceptHeader.IncludLinks)
+        {
+            tagCollectionDto.Links = CreateLinksForTags();
+        }
 
         return Ok(tagCollectionDto);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TagDto>> GetTag(string id)
+    public async Task<ActionResult<TagDto>> GetTag(
+        string id,
+        [FromHeader] AcceptHeaderDto acceptHeaderDto)
     {
         TagDto? tag = await dbContext.Tags
             .Where(t => t.Id == id)
@@ -45,12 +61,18 @@ public sealed class TagsController(ApplicationDbContext dbContext) : ControllerB
             return NotFound();
         }
 
+        if (acceptHeaderDto.IncludLinks)
+        {
+            tag.Links = CreateLinksForTag(id);
+        }
+
         return Ok(tag);
     }
 
     [HttpPost]
     public async Task<ActionResult<TagDto>> CreateTag(
         CreateTagDto createTagDto,
+        [FromHeader] AcceptHeaderDto acceptHeaderDto,
         IValidator<CreateTagDto> validator,
         ProblemDetailsFactory problemDetailsFactory)
     {
@@ -78,6 +100,11 @@ public sealed class TagsController(ApplicationDbContext dbContext) : ControllerB
         await dbContext.SaveChangesAsync();
 
         TagDto tagDto = tag.ToDto();
+
+        if (acceptHeaderDto.IncludLinks)
+        {
+            tagDto.Links = CreateLinksForTag(tagDto.Id);
+        }
 
         return CreatedAtAction(nameof(GetTag), new { id = tagDto.Id}, tagDto);
     }
@@ -114,5 +141,28 @@ public sealed class TagsController(ApplicationDbContext dbContext) : ControllerB
         await dbContext.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    private List<LinkDto> CreateLinksForTags()
+    {
+        List<LinkDto> links = 
+        [
+            linkService.Create(nameof(GetTags), "self", HttpMethods.Get),
+            linkService.Create(nameof(CreateTag), "create", HttpMethods.Post)
+        ];
+
+        return links;
+    }
+
+    private List<LinkDto> CreateLinksForTag(string id)
+    {
+        List<LinkDto> links =
+        [
+            linkService.Create(nameof(GetTag), "self", HttpMethods.Get, new { id }),
+            linkService.Create(nameof(UpdateTag), "update", HttpMethods.Put, new { id }),
+            linkService.Create(nameof(DeleteTag), "delete", HttpMethods.Delete, new { id })
+        ];
+
+        return links;
     }
 }

@@ -1,14 +1,9 @@
 using DevHabit.Api.DTOs.Common;
+using Newtonsoft.Json;
 
 namespace DevHabit.Api.DTOs.Tags;
 
-public sealed class TagCollectionDto : ICollectionResponse<TagDto>
-{
-    public List<TagDto> Item { get; init; }
-}
-
-
-public sealed record TagDto
+public sealed record TagDto : ILinksResponse
 {
     public required string Id { get; init; }
 
@@ -19,4 +14,7 @@ public sealed record TagDto
     public required DateTime CreatedAtUtc { get; init; }
 
     public DateTime? UpdatedAtUtc { get; init; }
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public List<LinkDto> Links { get; set; }
 }

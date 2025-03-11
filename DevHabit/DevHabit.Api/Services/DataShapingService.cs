@@ -45,7 +45,7 @@ public sealed class DataShapingService
     public List<ExpandoObject> ShapeCollectionData<T>(
         IEnumerable<T> entities, 
         string? fields,
-        Func<T, List<LinkDto>> linksFactory)
+        Func<T, List<LinkDto>>? linksFactory = null)
     {
         HashSet<string> fieldSet = fields?
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
