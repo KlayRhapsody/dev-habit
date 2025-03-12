@@ -16,9 +16,11 @@ using DevHabit.Api.Services;
 using System.Dynamic;
 using Asp.Versioning;
 using System.Net.Mime;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DevHabit.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("habits")]
 [ApiVersion("1.0")]
