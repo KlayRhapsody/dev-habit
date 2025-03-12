@@ -1,6 +1,6 @@
 # MJ Tech Pragmatic REST APIs - Dev Habit
 
-> 在此紀錄開發過程中遇到的問題與解決方案
+> 在此紀錄開發過程中遇到的問題以及如何解決與開發時注意事項
 
 ### **在 .http 中遇到變數不支援 . 符號的問題**
 
@@ -494,7 +494,32 @@ public IActionResult GetItem()
 
 ### **新增 Identity DbContext Migration**
 
-
 ```shell
 dotnet ef migrations add Add_Identity -o Migrations/Identity -c ApplicationIdentityDbContext
+```
+
+
+### **讓多個 DbContext 共用相同的資料庫連線與交易**
+
+使用兩個不同的 DbContext 可能會導致兩個獨立的資料庫交易，進而導致資料不一致的風險
+
+該方法只在相同的 Database 中有效，如果是不同的 Physical Database，則只能使用 Distributed Transaction 來處理
+
+```csharp
+public async Task<IActionResult> RegisterAsync(RegisterUserDto registerUserDto)
+{
+    using IDbContextTransaction transaction = await appIdentityDbContext.Database.BeginTransactionAsync();
+    appDbContext.Database.SetDbConnection(appIdentityDbContext.Database.GetDbConnection());
+    await appDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
+
+    IdentityResult identityResult = await userManager.CreateAsync(identityUser, registerUserDto.Password);
+
+    appDbContext.Users.Add(user);
+    
+    await appDbContext.SaveChangesAsync();
+
+    await transaction.CommitAsync();
+
+    return Ok(user.Id);
+}
 ```
