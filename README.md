@@ -490,3 +490,11 @@ public IActionResult GetItem()
     return Ok(item);
 }
 ```
+
+
+### **新增 Identity DbContext Migration**
+
+
+```shell
+dotnet ef migrations add Add_Identity -o Migrations/Identity -c ApplicationIdentityDbContext
+```
