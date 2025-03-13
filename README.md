@@ -524,6 +524,7 @@ public async Task<IActionResult> RegisterAsync(RegisterUserDto registerUserDto)
 }
 ```
 
+
 ### **`DefaultAuthenticateScheme` 與 `DefaultChallengeScheme` 是什麼？**
 
 這兩個屬性是在 **ASP.NET Core Identity 與 JWT 身份驗證** 中設定 **驗證與挑戰（Challenge）行為** 的。
@@ -532,4 +533,25 @@ public async Task<IActionResult> RegisterAsync(RegisterUserDto registerUserDto)
 |----------|---------|--------------|
 | `DefaultAuthenticateScheme` | 指定應用程式 **如何驗證 Token** | **當請求進來時，伺服器會解析 JWT** |
 | `DefaultChallengeScheme` | 指定應用程式 **如何回應未驗證的請求** | **當 Token 過期或無效時，伺服器回傳 `401 Unauthorized`** |
+
+
+### **為什麼要用 `RandomNumberGenerator` 產生 32 位元的隨機數作為 `Refresh Token`？**
+
+程式碼範例
+
+```csharp
+private static string GenerateRefreshToken()
+{
+    byte[] randomNumber = RandomNumberGenerator.GetBytes(32);
+    return Convert.ToBase64String(randomNumber);
+}
+```
+
+相關方法比較
+
+| **方法** | **熵強度** | **是否密碼學安全** | **可預測性** | **適合 Refresh Token？** |
+|----------|------------|-----------------|--------------|------------------|
+| `RandomNumberGenerator.GetBytes(32)` | 256-bit | ✅ 是 | ❌ 不可預測 | ✅ **最推薦** |
+| `Guid.NewGuid()` | 128-bit | ❌ 不是 | ⚠️ 部分可預測 | ❌ 不推薦 |
+| `Random.Next()` | 32-bit | ❌ 不是 | ✅ 容易預測 | ❌ 絕對不推薦 |
 

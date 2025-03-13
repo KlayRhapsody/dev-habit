@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using DevHabit.Api.DTOs.Auth;
 using DevHabit.Api.Settings;
@@ -44,8 +45,10 @@ public sealed class TokeProvider(IOptions<JwtAuthOptions> jwtAuthOptions)
         return token;
     }
 
-    private string GenerateRefreshToken()
+    private static string GenerateRefreshToken()
     {
-        return string.Empty;
+        byte[] randomNumber = RandomNumberGenerator.GetBytes(32);
+
+        return Convert.ToBase64String(randomNumber);
     }
 }
