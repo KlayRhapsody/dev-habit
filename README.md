@@ -523,3 +523,13 @@ public async Task<IActionResult> RegisterAsync(RegisterUserDto registerUserDto)
     return Ok(user.Id);
 }
 ```
+
+### **`DefaultAuthenticateScheme` 與 `DefaultChallengeScheme` 是什麼？**
+
+這兩個屬性是在 **ASP.NET Core Identity 與 JWT 身份驗證** 中設定 **驗證與挑戰（Challenge）行為** 的。
+
+| **屬性** | **作用** | **影響的行為** |
+|----------|---------|--------------|
+| `DefaultAuthenticateScheme` | 指定應用程式 **如何驗證 Token** | **當請求進來時，伺服器會解析 JWT** |
+| `DefaultChallengeScheme` | 指定應用程式 **如何回應未驗證的請求** | **當 Token 過期或無效時，伺服器回傳 `401 Unauthorized`** |
+
