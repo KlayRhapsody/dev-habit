@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace DevHabit.Api.Controllers;
 
-[Authorize]
+[Authorize(Roles = Roles.Member)]
 [ApiController]
 [Route("habits")]
 [ApiVersion("1.0")]
