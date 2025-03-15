@@ -555,3 +555,39 @@ private static string GenerateRefreshToken()
 | `Guid.NewGuid()` | 128-bit | ❌ 不是 | ⚠️ 部分可預測 | ❌ 不推薦 |
 | `Random.Next()` | 32-bit | ❌ 不是 | ✅ 容易預測 | ❌ 絕對不推薦 |
 
+
+### **`HasForeignKey<T>` 何時需要**
+
+一對一關係不明確，EF 需要指定 哪個表擁有外鍵
+
+```csharp
+builder.HasOne<User>()
+    .WithOne()
+    .HasForeignKey<GithubAccessToken>(g => g.UserId);
+```
+
+一對多關係，EF 自動知道多的一方持有外鍵
+
+```csharp
+builder.HasOne<User>()
+    .WithMany()
+    .HasForeignKey(h => h.UserId);
+```
+
+
+## **`SingleOrDefaultAsync()` 和 `FirstOrDefaultAsync()` 的差異**
+
+| **方法** | **回傳結果** | **多筆匹配時的行為** | **無匹配時的行為** | **常見使用場景** |
+|----------|------------|----------------|----------------|----------------|
+| **`SingleOrDefaultAsync()`** | **剛好 1 筆或 0 筆** | ⚠ **拋出異常（如果找到多筆）** | ✅ 回傳 `null` | **當你期望查詢結果最多只有 1 筆時（如 `ID` 查詢）** |
+| **`FirstOrDefaultAsync()`** | **找到的第一筆（如果有）** | ✅ **只取第一筆，不管有幾筆** | ✅ 回傳 `null` | **當你只想要第一筆符合條件的資料（如最新的一筆記錄）** |
+
+何時該用哪個？
+
+| **使用情境** | **建議方法** | **原因** |
+|--------------|-------------|------------|
+| **查找 `ID`（唯一值）** | `SingleOrDefaultAsync()` | 確保只有 1 筆 |
+| **查找 Email（唯一值）** | `SingleOrDefaultAsync()` | Email 應該是唯一的 |
+| **查找第一筆符合的資料** | `FirstOrDefaultAsync()` | 效能較好，避免異常 |
+| **查找最新一筆訂單** | `FirstOrDefaultAsync()`（加 `.OrderByDescending()`） | 只取最新的一筆 |
+| **查找最多只會有一筆的情境** | `SingleOrDefaultAsync()` | 確保不會有多筆 |
