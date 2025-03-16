@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DevHabit.Api.Services;
 
-public sealed class GitHubAccessTokenService(ApplicationDbContext dbContext)
+public sealed class GitHubAccessTokenService(ApplicationDbContext dbContext, EncryptionService encryptionService)
 {
     public async Task StoreAsync(
         string userId,
@@ -14,13 +14,15 @@ public sealed class GitHubAccessTokenService(ApplicationDbContext dbContext)
     {
         GithubAccessToken? accessToken = await GetAccessTokenAsync(userId, cancellationToken);
 
+        string encryptedToken = encryptionService.Encrypt(storeGithubAccessTokenDto.AccessToken);
+
         if (accessToken is null)
         {
             var githubAccessToken = new GithubAccessToken
             {
                 Id = $"gh_{Guid.CreateVersion7()}",
                 UserId = userId,
-                Token = storeGithubAccessTokenDto.AccessToken,
+                Token = encryptedToken,
                 CreatedAtUtc = DateTime.UtcNow,
                 ExpiresAtUtc = DateTime.UtcNow.AddDays(storeGithubAccessTokenDto.ExpiresInDays),
             };
@@ -30,7 +32,7 @@ public sealed class GitHubAccessTokenService(ApplicationDbContext dbContext)
         }
         else
         {
-            accessToken.Token = storeGithubAccessTokenDto.AccessToken;
+            accessToken.Token = encryptedToken;
             accessToken.ExpiresAtUtc = DateTime.UtcNow.AddDays(storeGithubAccessTokenDto.ExpiresInDays);
         }
         
@@ -41,7 +43,14 @@ public sealed class GitHubAccessTokenService(ApplicationDbContext dbContext)
     {
         GithubAccessToken? accessToken = await GetAccessTokenAsync(userId, cancellationToken);
 
-        return accessToken?.Token;
+        if (accessToken is null)
+        {
+            return null;
+        }
+        
+        string encryptedToken = encryptionService.Decrypt(accessToken.Token);
+
+        return encryptedToken;
     }
 
     public async Task RevokeAsync(string userId, CancellationToken cancellationToken = default)

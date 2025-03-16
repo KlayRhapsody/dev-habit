@@ -24,4 +24,8 @@
     <PackageReference Include="System.Linq.Dynamic.Core" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <UserSecretsId>74235a67-00fb-4eed-aca6-67d4a496f7e6</UserSecretsId>
+  </PropertyGroup>
+
 </Project>

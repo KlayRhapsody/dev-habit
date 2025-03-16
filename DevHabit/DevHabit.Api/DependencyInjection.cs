@@ -174,6 +174,9 @@ public static class DependencyInjection
                     .UserAgent.Add(new ProductInfoHeaderValue("DevHabit", "1.0"));
             });
 
+        builder.Services.Configure<EncryptionOptions>(builder.Configuration.GetSection("Encryption"));
+        builder.Services.AddTransient<EncryptionService>();
+
         return builder;
     }
 
