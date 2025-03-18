@@ -20,6 +20,7 @@ public sealed record HabitDto : ILinksResponse
     public DateTime? UpdatedAtUtc { get; init; }
     public DateTime? LastCompletedAtUtc { get; init; }
     public List<LinkDto> Links { get; set; }
+    public AutomationSource? AutomationSource { get; init; }
 }
 
 public sealed record FrequencyDto

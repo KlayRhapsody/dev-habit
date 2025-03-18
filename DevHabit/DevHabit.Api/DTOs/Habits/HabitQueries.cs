@@ -33,7 +33,8 @@ internal static class HabitQueries
             },
             CreatedAtUtc = h.CreatedAtUtc,
             UpdatedAtUtc = h.UpdatedAtUtc,
-            LastCompletedAtUtc = h.LastCompletedAtUtc
+            LastCompletedAtUtc = h.LastCompletedAtUtc,
+            AutomationSource = h.AutomationSource
         };
     }
 
@@ -66,7 +67,8 @@ internal static class HabitQueries
             CreatedAtUtc = h.CreatedAtUtc,
             UpdatedAtUtc = h.UpdatedAtUtc,
             LastCompletedAtUtc = h.LastCompletedAtUtc,
-            Tags = h.Tags.Select(t => t.Name).ToArray()
+            Tags = h.Tags.Select(t => t.Name).ToArray(),
+            AutomationSource = h.AutomationSource
         };
     }
 
@@ -99,7 +101,8 @@ internal static class HabitQueries
             CreatedAt = h.CreatedAtUtc,
             UpdatedAt = h.UpdatedAtUtc,
             LastCompletedAt = h.LastCompletedAtUtc,
-            Tags = h.Tags.Select(t => t.Name).ToArray()
+            Tags = h.Tags.Select(t => t.Name).ToArray(),
+            AutomationSource = h.AutomationSource
         };
     }
 }

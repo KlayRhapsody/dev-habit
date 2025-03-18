@@ -62,6 +62,11 @@ public sealed class CreateHabitDtoValidator : AbstractValidator<CreateHabitDto>
         RuleFor(x => x.Target.Unit)
             .Must((dto, unit) => IsTargetUnitCompatibleWithType(dto.Type, unit))
             .WithMessage("Target unit is not compatible with habit type");
+
+        RuleFor(x => x.AutomationSource)
+            .IsInEnum()
+            .When(x => x.AutomationSource is not null)
+            .WithMessage("Invalid automation source");
     }
 
     private bool IsTargetUnitCompatibleWithType(HabitType type, string unit)

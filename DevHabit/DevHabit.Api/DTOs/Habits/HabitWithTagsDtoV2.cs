@@ -18,4 +18,5 @@ public sealed record HabitWithTagsDtoV2
     public DateTime? UpdatedAt { get; init; }
     public DateTime? LastCompletedAt { get; init; }
     public required string[] Tags { get; init; }
+    public AutomationSource? AutomationSource { get; init; }
 }

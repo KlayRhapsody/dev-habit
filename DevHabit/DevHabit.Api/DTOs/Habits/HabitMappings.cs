@@ -61,7 +61,8 @@ internal static class HabitMappings
             },
             CreatedAtUtc = habit.CreatedAtUtc,
             UpdatedAtUtc = habit.UpdatedAtUtc,
-            LastCompletedAtUtc = habit.LastCompletedAtUtc
+            LastCompletedAtUtc = habit.LastCompletedAtUtc,
+            AutomationSource = habit.AutomationSource
         };
 
         return habitDto;
@@ -94,7 +95,8 @@ internal static class HabitMappings
                 Target = dto.Milestone.Target,
                 Current = 0
             },
-            CreatedAtUtc = DateTime.UtcNow
+            CreatedAtUtc = DateTime.UtcNow,
+            AutomationSource = dto.AutomationSource
         };
 
         return habit;
@@ -126,5 +128,7 @@ internal static class HabitMappings
         }
         
         habit.UpdatedAtUtc = DateTime.UtcNow;
+
+        habit.AutomationSource = dto.AutomationSource;
     }
 }

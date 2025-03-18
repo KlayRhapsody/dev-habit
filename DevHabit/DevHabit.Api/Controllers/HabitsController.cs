@@ -201,6 +201,14 @@ public sealed class HabitsController(
 
         Habit habit = createHabitDto.ToEntity(userId);
 
+        if (habit.AutomationSource is not null &&
+            await dbContext.Habits.AnyAsync(h => h.UserId == userId && h.AutomationSource == habit.AutomationSource))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Only one habit with this automation source is allowed: '{habit.AutomationSource}'");
+        }
+
         dbContext.Habits.Add(habit);
 
         await dbContext.SaveChangesAsync();
@@ -225,6 +233,15 @@ public sealed class HabitsController(
         if (habit is null)
         {
             return NotFound();
+        }
+
+        if (updateHabitDto.AutomationSource is not null &&
+            habit.AutomationSource is null &&
+            await dbContext.Habits.AnyAsync(h => h.UserId == userId && h.AutomationSource == updateHabitDto.AutomationSource))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Only one habit with this automation source is allowed: '{habit.AutomationSource}'");
         }
 
         habit.UpdateFromDto(updateHabitDto);
@@ -257,6 +274,15 @@ public sealed class HabitsController(
         if (!TryValidateModel(habitDto))
         {
             return ValidationProblem(ModelState);
+        }
+
+        if (habitDto.AutomationSource is not null &&
+            habit.AutomationSource != habitDto.AutomationSource &&
+            await dbContext.Habits.AnyAsync(h => h.UserId == userId && h.AutomationSource == habitDto.AutomationSource))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Only one habit with this automation source is allowed: '{habitDto.AutomationSource}'");
         }
 
         habit.Name = habitDto.Name;
