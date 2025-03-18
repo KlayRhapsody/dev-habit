@@ -7,6 +7,7 @@ using DevHabit.Api.DTOs.Entries;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Services;
 using DevHabit.Api.Services.Sorting;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -137,6 +138,157 @@ public sealed class EntriesController(
         return Ok(expandoObject);
     }
 
+    [HttpPost]
+    public async Task<ActionResult<EntryDto>> CreateEntry(
+        CreateEntryDto createEntryDto,
+        [FromHeader] AcceptHeaderDto acceptHeader,
+        IValidator<CreateEntryDto> validator)
+    {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        await validator.ValidateAndThrowAsync(createEntryDto);
+
+        Habit? habit = await dbContext.Habits
+            .Where(h => h.UserId == userId && h.Id == createEntryDto.HabitId)
+            .FirstOrDefaultAsync();
+
+        if (habit is null)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"Habit with ID '{createEntryDto.HabitId}' does not exist.");
+        }
+
+        Entry entry = createEntryDto.ToEntity(userId, habit);
+
+        dbContext.Entries.Add(entry);
+
+        await dbContext.SaveChangesAsync();
+
+        EntryDto entryDto = entry.ToDto();
+
+        if (acceptHeader.IncludLinks)
+        {
+            entryDto.Links = CreateLinksForEntry(entry.Id, null, entry.IsArchived);
+        }
+
+        return CreatedAtAction(
+            nameof(GetEntry),
+            new { id = entry.Id },
+            entryDto);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateEntry(
+        string id,
+        UpdateEntryDto updateEntryDto,
+        IValidator<UpdateEntryDto> validator)
+    {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        await validator.ValidateAndThrowAsync(updateEntryDto);
+
+        Entry? entry = await dbContext.Entries
+            .Where(e => e.UserId == userId && e.Id == id)
+            .FirstOrDefaultAsync();
+
+        if (entry is null)
+        {
+            return NotFound();
+        }
+
+        entry.UpdateFromDto(updateEntryDto);
+
+        await dbContext.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteEntry(string id)
+    {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        Entry? entry = await dbContext.Entries
+            .Where(e => e.UserId == userId && e.Id == id)
+            .FirstOrDefaultAsync();
+
+        if (entry is null)
+        {
+            return NotFound();
+        }
+
+        dbContext.Entries.Remove(entry);
+
+        await dbContext.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpPut("{id}/archive")]
+    public async Task<IActionResult> ArchiveEntry(string id)
+    {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        Entry? entry = await dbContext.Entries
+            .Where(e => e.UserId == userId && e.Id == id)
+            .FirstOrDefaultAsync();
+
+        if (entry is null)
+        {
+            return NotFound();
+        }
+
+        entry.IsArchived = true;
+        entry.UpdatedAtUtc = DateTime.UtcNow;
+
+        await dbContext.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpPut("{id}/unarchive")]
+    public async Task<IActionResult> UnArchiveEntry(string id)
+    {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        Entry? entry = await dbContext.Entries
+            .Where(e => e.UserId == userId && e.Id == id)
+            .FirstOrDefaultAsync();
+
+        if (entry is null)
+        {
+            return NotFound();
+        }
+
+        entry.IsArchived = false;
+        entry.UpdatedAtUtc = DateTime.UtcNow;
+        
+        await dbContext.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     private List<LinkDto> CreateLinksForEntries(EntriesQueryParameters query, bool hasPreviousPage, bool hasNextPage)
     {
         List<LinkDto> links = 
@@ -195,6 +347,11 @@ public sealed class EntriesController(
         List<LinkDto> links = 
         [
             linkService.Create(nameof(GetEntries), "self", HttpMethods.Get, new { id, fields }),
+            linkService.Create(nameof(UpdateEntry), "update", HttpMethods.Put, new { id }),
+            linkService.Create(nameof(DeleteEntry), "delete", HttpMethods.Put, new { id }),
+            isArchived ?
+                linkService.Create(nameof(UnArchiveEntry), "un-archive", HttpMethods.Put, new { id }) :
+                linkService.Create(nameof(ArchiveEntry), "archive", HttpMethods.Put, new { id }),
         ];
 
         return links;
