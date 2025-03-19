@@ -182,6 +182,58 @@ public sealed class EntriesController(
             entryDto);
     }
 
+    [HttpPost("batch")]
+    public async Task<ActionResult<List<EntryDto>>> CreateEntryBatch(
+        CreateEntryBatchDto createEntryBatchDto,
+        [FromHeader] AcceptHeaderDto acceptHeader,
+        IValidator<CreateEntryBatchDto> validator)
+    {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        await validator.ValidateAndThrowAsync(createEntryBatchDto);
+
+        var habitIds = createEntryBatchDto.Entries
+            .Select(e => e.HabitId)
+            .ToHashSet();
+
+        List<Habit> habits = await dbContext.Habits
+            .Where(h => habitIds.Contains(h.Id) && h.UserId == userId)
+            .ToListAsync();
+
+        if (habits.Count != habitIds.Count)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: "One or more habits do is invalid.");
+        }
+
+        var entries = createEntryBatchDto.Entries
+            .Select(dto => dto.ToEntity(userId, habits.First(h => h.Id == dto.HabitId)))
+            .ToList();
+
+        dbContext.Entries.AddRange(entries);
+
+        await dbContext.SaveChangesAsync();
+
+        var entryDtos = entries
+            .Select(EntryMappings.ToDto)
+            .ToList();
+        
+        if (acceptHeader.IncludLinks)
+        {
+            foreach (EntryDto entryDto in entryDtos)
+            {
+                entryDto.Links = CreateLinksForEntry(entryDto.Id, null, entryDto.IsArchived);
+            }
+        }
+
+        return CreatedAtAction(nameof(GetEntries), entryDtos);
+    }
+
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateEntry(
         string id,
