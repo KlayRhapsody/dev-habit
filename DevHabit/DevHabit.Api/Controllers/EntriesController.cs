@@ -305,6 +305,7 @@ public sealed class EntriesController(
                 source = query.Source,
                 isArchived = query.IsArchived,
             }),
+            linkService.Create(nameof(CreateEntry), "create", HttpMethods.Post),
         ];
 
         if (hasPreviousPage)
