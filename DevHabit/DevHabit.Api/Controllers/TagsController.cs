@@ -8,6 +8,7 @@ using DevHabit.Api.DTOs.Common;
 using DevHabit.Api.DTOs.Tags;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Services;
+using DevHabit.Api.Settings;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace DevHabit.Api.Controllers;
 
@@ -32,7 +34,9 @@ public sealed class TagsController(
     UserContext userContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<TagCollectionDto>> GetTags([FromHeader] AcceptHeaderDto acceptHeader)
+    public async Task<ActionResult<TagCollectionDto>> GetTags(
+        [FromHeader] AcceptHeaderDto acceptHeader,
+        IOptions<TagsOptions> options)
     {
         string? userId = await userContext.GetUserIdAsync();
         if (string.IsNullOrWhiteSpace(userId))
@@ -52,7 +56,11 @@ public sealed class TagsController(
 
         if (acceptHeader.IncludLinks)
         {
-            tagCollectionDto.Links = CreateLinksForTags();
+            tagCollectionDto.Links = CreateLinksForTags(tags.Count, options.Value.MaxAllowedTags);
+            foreach (TagDto tag in tagCollectionDto.Items)
+            {
+                tag.Links = CreateLinksForTag(tag.Id);
+            }
         }
 
         return Ok(tagCollectionDto);
@@ -179,13 +187,17 @@ public sealed class TagsController(
         return NoContent();
     }
 
-    private List<LinkDto> CreateLinksForTags()
+    private List<LinkDto> CreateLinksForTags(int count, int maxAllowedTags)
     {
         List<LinkDto> links = 
         [
             linkService.Create(nameof(GetTags), "self", HttpMethods.Get),
-            linkService.Create(nameof(CreateTag), "create", HttpMethods.Post)
         ];
+
+        if (count < maxAllowedTags)
+        {
+            links.Add(linkService.Create(nameof(CreateTag), "create", HttpMethods.Post));
+        }
 
         return links;
     }

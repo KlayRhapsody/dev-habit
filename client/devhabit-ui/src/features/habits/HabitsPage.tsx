@@ -17,7 +17,10 @@ export const HabitsPage: React.FC = () => {
   }, []);
 
   const loadHabits = async () => {
-    const result = await listHabits({ pageSize: 6 });
+    const result = await listHabits({ 
+      pageSize: 6,
+      fields: 'name,description,target,frequency,endDate,milestone'
+    });
     if (result) {
       setHabits(result.items);
       setCreateLink(result.links.find(l => l.rel === 'create') || null);
@@ -81,8 +84,8 @@ export const HabitsPage: React.FC = () => {
           <div className="grid gap-4">
             {habits.map(habit => (
               <Link
-                key={habit.id}
-                to={`/habits/${habit.id}`}
+                key={habit.links.find(l => l.rel === 'self')?.href}
+                to={new URL(habit.links.find(l => l.rel === 'self')?.href ?? '#').pathname}
                 className="block bg-white rounded-lg shadow hover:shadow-md transition-shadow p-4"
               >
                 <div className="flex justify-between items-start">

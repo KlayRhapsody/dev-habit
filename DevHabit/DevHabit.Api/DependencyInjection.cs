@@ -179,8 +179,15 @@ public static class DependencyInjection
                     .UserAgent.Add(new ProductInfoHeaderValue("DevHabit", "1.0"));
             });
 
-        builder.Services.Configure<EncryptionOptions>(builder.Configuration.GetSection("Encryption"));
+        builder.Services.Configure<EncryptionOptions>(
+            builder.Configuration.GetSection(EncryptionOptions.SectionName));
         builder.Services.AddTransient<EncryptionService>();
+
+        builder.Services.Configure<GitHubAutomationOptions>(
+            builder.Configuration.GetSection(GitHubAutomationOptions.SectionName));
+
+        builder.Services.Configure<TagsOptions>(
+            builder.Configuration.GetSection(TagsOptions.SectionName));
 
         return builder;
     }
@@ -191,8 +198,8 @@ public static class DependencyInjection
             .AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationIdentityDbContext>();
 
-        builder.Services.Configure<JwtAuthOptions>(builder.Configuration.GetSection("Jwt"));
-        JwtAuthOptions jwtAuthOptions = builder.Configuration.GetSection("Jwt").Get<JwtAuthOptions>()!;
+        builder.Services.Configure<JwtAuthOptions>(builder.Configuration.GetSection(JwtAuthOptions.SectionName));
+        JwtAuthOptions jwtAuthOptions = builder.Configuration.GetSection(JwtAuthOptions.SectionName).Get<JwtAuthOptions>()!;
 
         builder.Services.AddAuthentication(options =>
             {
@@ -248,7 +255,7 @@ public static class DependencyInjection
                     .WithSimpleSchedule(s =>
                     {
                         GitHubAutomationOptions settings = builder.Configuration
-                            .GetSection(GitHubAutomationOptions.GitHubAutomation)
+                            .GetSection(GitHubAutomationOptions.SectionName)
                             .Get<GitHubAutomationOptions>()!;
 
                         s.WithIntervalInMinutes(settings.ScanIntervalMinutes)

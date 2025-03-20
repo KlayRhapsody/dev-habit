@@ -17,6 +17,8 @@ using System.Dynamic;
 using Asp.Versioning;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
+using DevHabit.Api.Settings;
 
 namespace DevHabit.Api.Controllers;
 
