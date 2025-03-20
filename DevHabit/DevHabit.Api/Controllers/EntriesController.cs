@@ -58,7 +58,7 @@ public sealed class EntriesController(
 
         IQueryable<Entry> entriesQuery = dbContext.Entries
             .Where(e => e.UserId == userId)
-            .Where(e => e.HabitId == null || e.HabitId == query.HabitId)
+            .Where(e => query.HabitId == null || e.HabitId == query.HabitId)
             .Where(e => query.FromDate == null || e.Date >= query.FromDate)
             .Where(e => query.ToDate == null || e.Date <= query.ToDate)
             .Where(e => query.Source == null || e.Source == query.Source)
@@ -100,7 +100,7 @@ public sealed class EntriesController(
     [HttpGet("{id}")]
     public async Task<IActionResult> GetEntry(
         string id,
-        EntryQueryParameters query,
+        [FromQuery] EntryQueryParameters query,
         DataShapingService dataShapingService)
     {
         string? userId = await userContext.GetUserIdAsync();
@@ -117,8 +117,7 @@ public sealed class EntriesController(
         }
 
         EntryDto? entryDto = await dbContext.Entries
-            .Where(e => e.UserId == userId)
-            .Where(e => e.Id == id)
+            .Where(e => e.Id == id && e.UserId == userId)
             .Select(EntryQueries.ProjectToDto())
             .FirstOrDefaultAsync();
         
@@ -208,7 +207,7 @@ public sealed class EntriesController(
         {
             return Problem(
                 statusCode: StatusCodes.Status400BadRequest,
-                detail: "One or more habits do is invalid.");
+                detail: "One or more habits is invalid.");
         }
 
         var entries = createEntryBatchDto.Entries
@@ -358,6 +357,7 @@ public sealed class EntriesController(
                 isArchived = query.IsArchived,
             }),
             linkService.Create(nameof(CreateEntry), "create", HttpMethods.Post),
+            linkService.Create(nameof(CreateEntryBatch), "create-batch", HttpMethods.Post)
         ];
 
         if (hasPreviousPage)
