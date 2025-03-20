@@ -11,7 +11,7 @@ public sealed class Habit
     public Target Target { get; set; }
     public HabitStatus Status { get; set; }
     public bool IsArchived { get; set; }
-    public DateOnly? EndedDate { get; set; }
+    public DateOnly? EndDate { get; set; }
     public Milestone? Milestone { get; set; }
     public AutomationSource? AutomationSource { get; set; }
     public DateTime CreatedAtUtc { get; set; }

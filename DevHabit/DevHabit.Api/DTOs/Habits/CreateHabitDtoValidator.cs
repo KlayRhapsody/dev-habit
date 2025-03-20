@@ -48,7 +48,7 @@ public sealed class CreateHabitDtoValidator : AbstractValidator<CreateHabitDto>
             .Must(unit => AllowedUnits.Contains(unit.ToLowerInvariant()))
             .WithMessage($"Unit must be one of the following: {string.Join(", ", AllowedUnits)}");
 
-        RuleFor(x => x.EndedDate)
+        RuleFor(x => x.EndDate)
             .Must(date => date is null || date > DateOnly.FromDateTime(DateTime.UtcNow))
             .WithMessage("Ended date must be in the future");
 

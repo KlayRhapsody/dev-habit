@@ -25,7 +25,7 @@ internal static class HabitMappings
                 $"{nameof(HabitDto.Target)}.{nameof(HabitDto.Target.Unit)}",
                 $"{nameof(Habit.Target)}.{nameof(Habit.Target.Unit)}"),
             new SortMapping(nameof(HabitDto.Status), nameof(Habit.Status)),
-            new SortMapping(nameof(HabitDto.EndedDate), nameof(Habit.EndedDate)),
+            new SortMapping(nameof(HabitDto.EndDate), nameof(Habit.EndDate)),
             new SortMapping(nameof(HabitDto.Milestone), nameof(Habit.Milestone.Target)),
             new SortMapping(nameof(HabitDto.CreatedAtUtc), nameof(Habit.CreatedAtUtc)),
             new SortMapping(nameof(HabitDto.UpdatedAtUtc), nameof(Habit.UpdatedAtUtc)),
@@ -53,7 +53,7 @@ internal static class HabitMappings
             },
             Status = habit.Status,
             IsArchived = habit.IsArchived,
-            EndedDate = habit.EndedDate,
+            EndDate = habit.EndDate,
             Milestone = habit.Milestone == null ? null : new MilestoneDto
             {
                 Target = habit.Milestone.Target,
@@ -89,7 +89,7 @@ internal static class HabitMappings
             },
             Status = HabitStatus.Ongoing,
             IsArchived = false,
-            EndedDate = dto.EndedDate,
+            EndDate = dto.EndDate,
             Milestone = dto.Milestone == null ? null : new Milestone
             {
                 Target = dto.Milestone.Target,
@@ -107,7 +107,7 @@ internal static class HabitMappings
         habit.Name = dto.Name;
         habit.Description = dto.Description;
         habit.Type = dto.Type;
-        habit.EndedDate = dto.EndedDate;
+        habit.EndDate = dto.EndDate;
 
         habit.Frequency = new Frequency
         {

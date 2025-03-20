@@ -25,7 +25,7 @@ internal static class HabitQueries
             },
             Status = h.Status,
             IsArchived = h.IsArchived,
-            EndedDate = h.EndedDate,
+            EndDate = h.EndDate,
             Milestone = h.Milestone == null ? null : new MilestoneDto
             {
                 Target = h.Milestone.Target,
@@ -58,7 +58,7 @@ internal static class HabitQueries
             },
             Status = h.Status,
             IsArchived = h.IsArchived,
-            EndedDate = h.EndedDate,
+            EndDate = h.EndDate,
             Milestone = h.Milestone == null ? null : new MilestoneDto
             {
                 Target = h.Milestone.Target,
@@ -92,7 +92,7 @@ internal static class HabitQueries
             },
             Status = h.Status,
             IsArchived = h.IsArchived,
-            EndedDate = h.EndedDate,
+            EndDate = h.EndDate,
             Milestone = h.Milestone == null ? null : new MilestoneDto
             {
                 Target = h.Milestone.Target,
