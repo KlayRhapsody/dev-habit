@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace DevHabit.Api.DTOs.Tags;
 
-public sealed class TagCollectionDto : ICollectionResponse<TagDto>, ILinksResponse
+public sealed class TagsCollectionDto : ICollectionResponse<TagDto>, ILinksResponse
 {
     public List<TagDto> Items { get; init; }
 

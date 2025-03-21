@@ -591,3 +591,11 @@ builder.HasOne<User>()
 | **查找第一筆符合的資料** | `FirstOrDefaultAsync()` | 效能較好，避免異常 |
 | **查找最新一筆訂單** | `FirstOrDefaultAsync()`（加 `.OrderByDescending()`） | 只取最新的一筆 |
 | **查找最多只會有一筆的情境** | `SingleOrDefaultAsync()` | 確保不會有多筆 |
+
+
+
+### **Rename DB Table Column**
+
+* 重新命名 Entities 類型中的類別欄位名稱與相關程式碼
+    - 原 migration 自動產生的欄位不用調整
+* `dotnet ef migrations add Rename_XXXX ...`

@@ -34,7 +34,7 @@ public sealed class TagsController(
     UserContext userContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<TagCollectionDto>> GetTags(
+    public async Task<ActionResult<TagsCollectionDto>> GetTags(
         [FromHeader] AcceptHeaderDto acceptHeader,
         IOptions<TagsOptions> options)
     {
@@ -49,21 +49,21 @@ public sealed class TagsController(
             .Select(TagQueries.ProjectToDto())
             .ToListAsync();
 
-        TagCollectionDto tagCollectionDto = new()
+        TagsCollectionDto TagsCollectionDto = new()
         {
             Items = tags
         };
 
         if (acceptHeader.IncludLinks)
         {
-            tagCollectionDto.Links = CreateLinksForTags(tags.Count, options.Value.MaxAllowedTags);
-            foreach (TagDto tag in tagCollectionDto.Items)
+            TagsCollectionDto.Links = CreateLinksForTags(tags.Count, options.Value.MaxAllowedTags);
+            foreach (TagDto tag in TagsCollectionDto.Items)
             {
                 tag.Links = CreateLinksForTag(tag.Id);
             }
         }
 
-        return Ok(tagCollectionDto);
+        return Ok(TagsCollectionDto);
     }
 
     [HttpGet("{id}")]
