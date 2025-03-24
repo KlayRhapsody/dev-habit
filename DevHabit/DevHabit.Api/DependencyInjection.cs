@@ -77,6 +77,8 @@ public static class DependencyInjection
 
         builder.Services.AddOpenApi();
 
+        builder.Services.AddResponseCaching();
+
         return builder;
     }
 

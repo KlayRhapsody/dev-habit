@@ -12,8 +12,8 @@ builder
     .AddObservability()
     .AddApplicationServices()
     .AddAuthenticationServices()
-    .AddCorsPolicy()
-    .AddBackgroundJobs();
+    .AddCorsPolicy();
+    // .AddBackgroundJobs();
     
 WebApplication app = builder.Build();
 
@@ -31,6 +31,8 @@ app.UseHttpsRedirection();
 app.UseExceptionHandler();
 
 app.UseCors(CorsOptions.PolicyName);
+
+app.UseResponseCaching();
 
 app.UseAuthentication();
 

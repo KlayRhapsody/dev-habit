@@ -593,9 +593,16 @@ builder.HasOne<User>()
 | **查找最多只會有一筆的情境** | `SingleOrDefaultAsync()` | 確保不會有多筆 |
 
 
-
 ### **Rename DB Table Column**
 
 * 重新命名 Entities 類型中的類別欄位名稱與相關程式碼
     - 原 migration 自動產生的欄位不用調整
 * `dotnet ef migrations add Rename_XXXX ...`
+
+
+### **預設的快取注意事項**
+
+Response Caching
+
+* 快取只會在 GET、HEAD 請求中生效，且非完成身份驗證的請求
+* 適用於靜態資源或是 JSON 資料
