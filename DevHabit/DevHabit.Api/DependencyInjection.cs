@@ -191,6 +191,8 @@ public static class DependencyInjection
         builder.Services.Configure<TagsOptions>(
             builder.Configuration.GetSection(TagsOptions.SectionName));
 
+        builder.Services.AddSingleton<InMemoryETagStore>();
+
         return builder;
     }
 
