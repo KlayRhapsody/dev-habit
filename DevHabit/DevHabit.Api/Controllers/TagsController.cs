@@ -143,7 +143,7 @@ public sealed class TagsController(
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateTag(string id, UpdateTagDto updateTagDto)
+    public async Task<ActionResult> UpdateTag(string id, UpdateTagDto updateTagDto, InMemoryETagStore eTagStore)
     {
         string? userId = await userContext.GetUserIdAsync();
         if (string.IsNullOrWhiteSpace(userId))
@@ -161,6 +161,8 @@ public sealed class TagsController(
         tag.UpdateFromDto(updateTagDto);
 
         await dbContext.SaveChangesAsync();
+
+        eTagStore.SetETag(Request.Path.Value!, tag.ToDto());
 
         return NoContent();
     }

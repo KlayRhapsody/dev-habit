@@ -1,5 +1,8 @@
 
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace DevHabit.Api.Services;
 
@@ -17,8 +20,22 @@ public sealed class InMemoryETagStore
         ETags.AddOrUpdate(resourceUri, eTag, (_, _) => eTag);
     }
 
+    public void SetETag(string resourceUri, object resource)
+    {
+        ETags.AddOrUpdate(resourceUri, GenerateETag(resource), (_, _) => GenerateETag(resource));
+    }
+
     public void RemoveETag(string resourceUri)
     {
         ETags.TryRemove(resourceUri, out _);
+    }
+
+    private static string GenerateETag(object resource)
+    {
+        byte[] content = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(resource));
+
+        byte[] bytes = SHA512.HashData(content);
+
+        return Convert.ToHexString(bytes);
     }
 }

@@ -6,6 +6,12 @@ namespace DevHabit.Api.Middleware;
 
 public sealed class ETagMiddleware(RequestDelegate next)
 {
+    private static readonly string[] ConcurrencyCheckMethods = 
+    [
+        HttpMethods.Put,
+        HttpMethods.Patch
+    ];
+
     public async Task InvokeAsync(HttpContext context, InMemoryETagStore eTagStore)
     {
         if (CanSkipETag(context))
@@ -16,7 +22,20 @@ public sealed class ETagMiddleware(RequestDelegate next)
         }
 
         string resourceUri = context.Request.Path.Value!;
-        string ifNoneMatch = context.Request.Headers.IfNoneMatch.FirstOrDefault()?.Replace("\"", "");
+        string? ifNoneMatch = context.Request.Headers.IfNoneMatch.FirstOrDefault()?.Replace("\"", "");
+        string? ifMatch = context.Request.Headers.IfMatch.FirstOrDefault()?.Replace("\"", "");
+
+        if (ConcurrencyCheckMethods.Contains(context.Request.Method) && !string.IsNullOrWhiteSpace(ifMatch))
+        {
+            string currentETag = eTagStore.GetETag(resourceUri);
+
+            if (string.IsNullOrWhiteSpace(currentETag) && currentETag != ifMatch)
+            {
+                context.Response.StatusCode = StatusCodes.Status412PreconditionFailed;
+                context.Response.ContentLength = 0;
+                return;
+            }
+        }
 
         Stream originalStream = context.Response.Body;
         using var memoryStream = new MemoryStream();
@@ -43,11 +62,12 @@ public sealed class ETagMiddleware(RequestDelegate next)
             }
         }
 
+        context.Response.Body = originalStream;
         memoryStream.Position = 0;
         await memoryStream.CopyToAsync(originalStream);
     }
 
-    private string GenerateETag(byte[] body)
+    private static string GenerateETag(byte[] body)
     {
         byte[] bytes = SHA512.HashData(body);
         return Convert.ToHexString(bytes);
@@ -63,7 +83,7 @@ public sealed class ETagMiddleware(RequestDelegate next)
         return Encoding.UTF8.GetBytes(body);
     }
 
-    private bool IsETaggableResponse(HttpContext context)
+    private static bool IsETaggableResponse(HttpContext context)
     {
         return context.Response.StatusCode == StatusCodes.Status200OK &&
                 (context.Response.Headers.ContentType
@@ -71,7 +91,7 @@ public sealed class ETagMiddleware(RequestDelegate next)
                     .Contains("json", StringComparison.OrdinalIgnoreCase) ?? false);
     }
 
-    private bool CanSkipETag(HttpContext context)
+    private static bool CanSkipETag(HttpContext context)
     {
         return context.Request.Method == HttpMethods.Post || 
                 context.Request.Method == HttpMethods.Delete;
