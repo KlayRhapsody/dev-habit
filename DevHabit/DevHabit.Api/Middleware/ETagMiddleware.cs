@@ -29,7 +29,7 @@ public sealed class ETagMiddleware(RequestDelegate next)
         {
             string currentETag = eTagStore.GetETag(resourceUri);
 
-            if (string.IsNullOrWhiteSpace(currentETag) && currentETag != ifMatch)
+            if (!string.IsNullOrWhiteSpace(currentETag) && currentETag != ifMatch)
             {
                 context.Response.StatusCode = StatusCodes.Status412PreconditionFailed;
                 context.Response.ContentLength = 0;
