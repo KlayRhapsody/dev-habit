@@ -41,8 +41,16 @@ public sealed class ETagMiddleware(RequestDelegate next)
         using var memoryStream = new MemoryStream();
         context.Response.Body = memoryStream;
         
-        await next(context);
-
+        try
+        {
+            await next(context);
+        }
+        catch (Exception)
+        {
+            context.Response.Body = originalStream;
+            throw;
+        }
+        
         if (IsETaggableResponse(context))
         {
             memoryStream.Position = 0;

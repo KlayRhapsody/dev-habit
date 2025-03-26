@@ -606,3 +606,15 @@ Response Caching
 
 * 快取只會在 GET、HEAD 請求中生效，且非完成身份驗證的請求
 * 適用於靜態資源或是 JSON 資料
+
+
+### **定義 resilience 策略時所需注意事項**
+
+* 建議使用預設的 resilience handler
+* 目前全域設定無法被覆蓋，若想在自定義 Resilience Handler，則須先移除所有的 Resilience Handler
+* 預設提供的移除方法目前為實驗性質，需自行實作
+
+
+### **ETag 做法注意事項**
+
+使用 MemoryStream 替換掉 Response.Body 時須將 `await next(context)` try catch 起來，否則當例外發生時，Global Exception Handler 無法寫入資訊
