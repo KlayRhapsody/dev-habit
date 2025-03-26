@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using Asp.Versioning;
 using DevHabit.Api.Database;
@@ -20,6 +21,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Http.Resilience;
@@ -319,6 +321,65 @@ public static class DependencyInjection
         builder.Services.AddQuartzHostedService(options =>
         {
             options.WaitForJobsToComplete = true;
+        });
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddRateLimiting(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            options.OnRejected = async (context, token) =>
+            {
+                if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out TimeSpan retryAfter))
+                {
+                    context.HttpContext.Response.Headers.RetryAfter = $"{retryAfter.TotalSeconds}";
+
+                    ProblemDetailsFactory problemDetailsFactory = context.HttpContext.RequestServices
+                        .GetRequiredService<ProblemDetailsFactory>();
+
+                    Microsoft.AspNetCore.Mvc.ProblemDetails problemDetails = problemDetailsFactory.CreateProblemDetails(
+                        context.HttpContext,
+                        StatusCodes.Status429TooManyRequests,
+                        title: "Too Many Requests",
+                        detail: $"Too Many Requests. Try again in {retryAfter.TotalSeconds} seconds."
+                    );
+
+                    await context.HttpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken: token);
+                }
+            };
+
+            options.AddPolicy("default", static httpContext =>
+            {
+                string identityId = httpContext.User.GetIdentityId() ?? string.Empty;
+
+                if (!string.IsNullOrWhiteSpace(identityId))
+                {
+                    return RateLimitPartition.GetTokenBucketLimiter(
+                        identityId,
+                        _ =>
+                            new TokenBucketRateLimiterOptions
+                            {
+                                TokenLimit = 100,
+                                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                                QueueLimit = 5,
+                                ReplenishmentPeriod = TimeSpan.FromMinutes(1),
+                                TokensPerPeriod = 25
+                            });
+                }
+                
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    "default",
+                    _ =>
+                        new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 5,
+                            Window = TimeSpan.FromMinutes(1)
+                        });
+            });
         });
 
         return builder;

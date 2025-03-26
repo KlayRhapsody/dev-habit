@@ -13,8 +13,9 @@ builder
     .AddObservability()
     .AddApplicationServices()
     .AddAuthenticationServices()
-    .AddCorsPolicy();
+    .AddCorsPolicy()
     // .AddBackgroundJobs();
+    .AddRateLimiting();
     
 WebApplication app = builder.Build();
 
@@ -38,6 +39,8 @@ app.UseResponseCaching();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseRateLimiter();
 
 app.UseMiddleware<ETagMiddleware>();
 
