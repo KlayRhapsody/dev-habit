@@ -25,6 +25,8 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.11.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.11.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.14.0" />
+    <PackageVersion Include="Refit.HttpClientFactory" Version="8.0.0" />
+    <PackageVersion Include="Refit.Newtonsoft.Json" Version="8.0.0" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.6.0.109712" />
     <PackageVersion Include="System.Linq.Dynamic.Core" Version="1.6.0.2" />
   </ItemGroup>

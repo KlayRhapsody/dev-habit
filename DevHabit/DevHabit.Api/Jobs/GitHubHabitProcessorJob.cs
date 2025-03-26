@@ -11,7 +11,7 @@ public class GitHubHabitProcessorJob(
     ApplicationDbContext dbContext,
     ILogger<GitHubHabitProcessorJob> logger,
     GitHubAccessTokenService gitHubAccessTokenService,
-    GitHubService gitHubService) : IJob
+    RefitGitHubService gitHubService) : IJob
 {
     private const string PushEvent = "PushEvent";
 
