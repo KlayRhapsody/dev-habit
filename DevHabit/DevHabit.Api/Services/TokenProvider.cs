@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace DevHabit.Api.Services;
 
-public sealed class TokeProvider(IOptions<JwtAuthOptions> jwtAuthOptions)
+public sealed class TokenProvider(IOptions<JwtAuthOptions> jwtAuthOptions)
 {
     private readonly JwtAuthOptions _jwtAuthOptions = jwtAuthOptions.Value;
 

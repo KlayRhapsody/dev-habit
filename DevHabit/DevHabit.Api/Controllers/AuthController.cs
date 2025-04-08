@@ -20,7 +20,7 @@ public sealed class AuthController(
     UserManager<IdentityUser> userManager,
     ApplicationDbContext appDbContext,
     ApplicationIdentityDbContext appIdentityDbContext,
-    TokeProvider tokenProvider,
+    TokenProvider tokenProvider,
     IOptions<JwtAuthOptions> options) : ControllerBase
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;

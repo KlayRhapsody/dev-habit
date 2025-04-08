@@ -168,7 +168,7 @@ public static class DependencyInjection
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddTransient<LinkService>();
 
-        builder.Services.AddTransient<TokeProvider>();
+        builder.Services.AddTransient<TokenProvider>();
 
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<UserContext>();
