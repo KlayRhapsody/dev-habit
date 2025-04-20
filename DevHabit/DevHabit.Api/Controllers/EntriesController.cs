@@ -343,6 +343,96 @@ public sealed class EntriesController(
         return NoContent();
     }
 
+    [HttpGet("stats")]
+    public async Task<ActionResult<EntryStatsDto>> GetStats()
+    {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        var entries = await dbContext.Entries
+            .Where(e => e.UserId == userId)
+            .OrderBy(e => e.Date)
+            .Select(e => new { e.Date })
+            .ToListAsync();
+
+        if (!entries.Any())
+        {
+            return Ok(new EntryStatsDto
+            {
+                DailyStats = [],
+                TotalEntries = 0,
+                CurrentStreak = 0,
+                LongestStreak = 0
+            });
+        }
+
+        int totalEntries = entries.Count;
+        var dailyStats = entries
+            .GroupBy(e => e.Date)
+            .Select(g => new DailyStatsDto 
+            { 
+                Date = g.Key,
+                Count = g.Count()
+            })
+            .OrderByDescending(g => g.Date)
+            .ToList();
+
+
+        int longestStreak = 0;
+        int currentStreak = 0;
+        int currentCount = 0;
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var dates = entries.Select(e => e.Date).Distinct().OrderBy(e => e).ToList();
+
+        for (int i = dates.Count - 1; i >= 0; i--)
+        {
+            if (i == dates.Count - 1)
+            {
+                if (dates[i] == today)
+                {
+                    currentStreak = 1;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else if (dates[i + 1] == dates[i].AddDays(1))
+            {
+                currentStreak++;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        for (int i = 0; i < dates.Count; i++)
+        {
+            if (i == 0 || dates[i] == dates[i - 1].AddDays(1))
+            {
+                currentCount++;
+                longestStreak = Math.Max(longestStreak, currentCount);
+            }
+            else
+            {
+                currentCount = 0;
+            }
+        }
+
+        return Ok(new EntryStatsDto
+        {
+            DailyStats = dailyStats,
+            TotalEntries = totalEntries,
+            CurrentStreak = currentStreak,
+            LongestStreak = longestStreak
+        });
+    }
+
     private List<LinkDto> CreateLinksForEntries(EntriesQueryParameters query, bool hasPreviousPage, bool hasNextPage)
     {
         List<LinkDto> links = 
