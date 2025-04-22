@@ -15,6 +15,7 @@ import { EntriesPage } from './features/entries/EntriesPage';
 import { CreateEntryPage } from './features/entries/CreateEntryPage';
 import { EditEntryPage } from './features/entries/EditEntryPage';
 import { CreateBatchEntriesPage } from './features/entries/CreateBatchEntriesPage';
+import { EntryImportsPage } from './features/entries/EntryImportsPage';
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
             <Route path="/entries/create-batch" element={<CreateBatchEntriesPage />} />
             <Route path="/entries/:id/edit" element={<EditEntryPage />} />
             <Route path="/tags" element={<TagsPage />} />
+            <Route path="/entries/imports" element={<EntryImportsPage />} />
           </Route>
 
           {/* Catch all */}

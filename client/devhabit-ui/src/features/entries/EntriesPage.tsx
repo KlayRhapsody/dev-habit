@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEntries } from './useEntries';
 import { Entry, EntrySource, EntriesResponse } from './types';
 import { format } from 'date-fns';
+import type { Link as HypermediaLink } from '../../types/api';
 
 const EntryCard = ({
   entry,
@@ -69,27 +70,33 @@ const EntryCard = ({
 
 export const EntriesPage: React.FC = () => {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
   const [entries, setEntries] = useState<Entry[]>([]);
   const [entriesResponse, setEntriesResponse] = useState<EntriesResponse | null>(null);
+  const [nextPageLink, setNextPageLink] = useState<HypermediaLink | null>(null);
+  const [prevPageLink, setPrevPageLink] = useState<HypermediaLink | null>(null);
 
-  const { getEntries, deleteEntry, archiveEntry, unarchiveEntry, isLoading, error } = useEntries();
+  const { getEntriesCursor, deleteEntry, archiveEntry, unarchiveEntry, isLoading, error } =
+    useEntries();
 
   useEffect(() => {
     loadEntries();
-  }, [page]);
+  }, []);
 
-  const loadEntries = async () => {
-    const result = await getEntries({
-      page,
-      pageSize,
-      sort: 'date desc,createdAtUtc desc',
+  const loadEntries = async (url?: string) => {
+    const result = await getEntriesCursor({
+      limit: 6,
+      url,
     });
     if (result) {
-      setEntries(result.items);
+      setEntries(prevEntries => [...prevEntries, ...result.items]);
       setEntriesResponse(result);
+      setNextPageLink(result.links.find(l => l.rel === 'next-page') || null);
+      setPrevPageLink(result.links.find(l => l.rel === 'previous-page') || null);
     }
+  };
+
+  const handlePageChange = async (link: HypermediaLink) => {
+    await loadEntries(link.href);
   };
 
   const handleDelete = async (entry: Entry) => {
@@ -157,6 +164,12 @@ export const EntriesPage: React.FC = () => {
         <h1 className="text-2xl font-semibold">My Entries</h1>
         <div className="space-x-4">
           <button
+            onClick={() => navigate('/entries/imports')}
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 cursor-pointer"
+          >
+            Import Entries
+          </button>
+          <button
             onClick={() => {
               const createBatchLink = entriesResponse?.links?.find(
                 link => link.rel === 'create-batch'
@@ -191,28 +204,26 @@ export const EntriesPage: React.FC = () => {
         ))}
       </div>
 
-      {entriesResponse && (
-        <div className="flex justify-center gap-4 mt-6">
-          {entriesResponse.hasPreviousPage && (
-            <button
-              onClick={() => setPage(page - 1)}
-              className="px-4 py-2 text-blue-600 hover:text-blue-800 cursor-pointer"
-              disabled={isLoading}
-            >
-              ← Previous
-            </button>
-          )}
-          {entriesResponse.hasNextPage && (
-            <button
-              onClick={() => setPage(page + 1)}
-              className="px-4 py-2 text-blue-600 hover:text-blue-800 cursor-pointer"
-              disabled={isLoading}
-            >
-              Next →
-            </button>
-          )}
-        </div>
-      )}
+      <div className="flex justify-center gap-4 mt-6">
+        {prevPageLink && (
+          <button
+            onClick={() => handlePageChange(prevPageLink)}
+            className="px-4 py-2 text-blue-600 hover:text-blue-800 cursor-pointer"
+            disabled={isLoading}
+          >
+            ← Previous
+          </button>
+        )}
+        {nextPageLink && (
+          <button
+            onClick={() => handlePageChange(nextPageLink)}
+            className="px-4 py-2 text-blue-600 hover:text-blue-800 cursor-pointer"
+            disabled={isLoading}
+          >
+            Load more
+          </button>
+        )}
+      </div>
     </div>
   );
 };

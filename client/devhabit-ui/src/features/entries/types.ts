@@ -49,3 +49,26 @@ export interface EntriesResponse extends HateoasResponse {
   hasPreviousPage: boolean;
   hasNextPage: boolean;
 }
+
+export interface EntryImportJob extends HateoasResponse {
+  id: string;
+  fileName: string;
+  status: EntryImportStatus;
+  createdAtUtc: string;
+  processedAtUtc?: string;
+  errorMessage?: string;
+}
+
+export enum EntryImportStatus {
+  Pending = 0,
+  Processing = 1,
+  Completed = 2,
+  Failed = 3,
+}
+
+export interface EntryImportJobsResponse extends HateoasResponse {
+  items: EntryImportJob[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+}

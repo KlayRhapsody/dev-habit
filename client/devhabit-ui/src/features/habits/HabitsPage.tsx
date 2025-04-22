@@ -17,9 +17,9 @@ export const HabitsPage: React.FC = () => {
   }, []);
 
   const loadHabits = async () => {
-    const result = await listHabits({ 
+    const result = await listHabits({
       pageSize: 6,
-      fields: 'name,description,target,frequency,endDate,milestone'
+      fields: 'name,description,target,frequency,endDate,milestone',
     });
     if (result) {
       setHabits(result.items);

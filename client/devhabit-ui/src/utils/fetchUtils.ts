@@ -42,10 +42,14 @@ export async function fetchWithAuth<T>(
     throw new Error('No access token available');
   }
 
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
+  // Only set Content-Type if we're not sending FormData
+  const defaultHeaders: Record<string, string> = {
     Authorization: `Bearer ${accessToken}`,
   };
+
+  if (!(options.body instanceof FormData)) {
+    defaultHeaders['Content-Type'] = 'application/json';
+  }
 
   const response = await fetch(url, {
     ...options,

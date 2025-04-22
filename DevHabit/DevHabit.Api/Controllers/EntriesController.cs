@@ -99,6 +99,79 @@ public sealed class EntriesController(
         return Ok(paginationResult);
     }
 
+    [HttpGet("cursor")]
+    public async Task<IActionResult> GetEntriesCursor(
+        [FromQuery] EntriesCursorQueryParameters query,
+        DataShapingService dataShapingService)
+    {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        if (!dataShapingService.Validate<Entry>(query.Fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"The provided fields parameter isn't valid: '{query.Fields}'");
+        }
+
+        IQueryable<Entry> entriesQuery = dbContext.Entries
+            .Where(e => e.UserId == userId)
+            .Where(e => query.HabitId == null || e.HabitId == query.HabitId)
+            .Where(e => query.FromDate == null || e.Date >= query.FromDate)
+            .Where(e => query.ToDate == null || e.Date <= query.ToDate)
+            .Where(e => query.Source == null || e.Source == query.Source)
+            .Where(e => query.IsArchived == null || e.IsArchived == query.IsArchived);
+
+        if (!string.IsNullOrWhiteSpace(query.Cursor))
+        {
+            var cursor = EntryCursorDto.Decode(query.Cursor);
+            if (cursor is not null)
+            {
+                entriesQuery = entriesQuery.Where(e => 
+                    e.Date < cursor.Date || 
+                    e.Date == cursor.Date && string.Compare(e.Id, cursor.Id) <= 0);
+            }
+        }
+
+        List<EntryDto> entries = await entriesQuery
+            .OrderByDescending(e => e.Date)
+            .ThenByDescending(e => e.Id)
+            .Take(query.Limit + 1)
+            .Select(EntryQueries.ProjectToDto())
+            .ToListAsync();
+
+        bool hasNextPage = entries.Count > query.Limit;
+        string? nextCursor = null;
+        if (hasNextPage)
+        {
+            EntryDto lastEntry = entries[^1];
+            nextCursor = EntryCursorDto.Encode(lastEntry.Id, lastEntry.Date);
+            entries.RemoveAt(entries.Count - 1);
+        }
+
+        var paginationResult = new CollectionResponse<ExpandoObject>
+        {
+            Items = dataShapingService.ShapeCollectionData(
+                    entries, 
+                    query.Fields,
+                    query.IncludLinks ? 
+                        e => CreateLinksForEntry(e.Id, query.Fields, e.IsArchived) : 
+                        null),
+        };
+
+        if (query.IncludLinks)
+        {
+            paginationResult.Links = CreateLinksForEntriesCursor(
+                query,
+                nextCursor);
+        }
+
+        return Ok(paginationResult);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetEntry(
         string id,
@@ -140,7 +213,7 @@ public sealed class EntriesController(
     }
 
     [HttpPost]
-    [IdempotentRequest]
+    // [IdempotentRequest]
     public async Task<ActionResult<EntryDto>> CreateEntry(
         CreateEntryDto createEntryDto,
         [FromHeader] AcceptHeaderDto acceptHeader,
@@ -476,6 +549,43 @@ public sealed class EntriesController(
                 page = query.Page + 1,
                 pageSize = query.PageSize,
                 sort = query.Sort,
+                fields = query.Fields,
+                habitId = query.HabitId,
+                fromDate = query.FromDate,
+                toDate = query.ToDate,
+                source = query.Source,
+                isArchived = query.IsArchived,
+            }));
+        }
+
+        return links;
+    }
+
+    private List<LinkDto> CreateLinksForEntriesCursor(EntriesCursorQueryParameters query, string? nextCursor)
+    {
+        List<LinkDto> links = 
+        [
+            linkService.Create(nameof(GetEntriesCursor), "self", HttpMethods.Get, new 
+            {
+                cursor = query.Cursor,
+                limit = query.Limit,
+                fields = query.Fields,
+                habitId = query.HabitId,
+                fromDate = query.FromDate,
+                toDate = query.ToDate,
+                source = query.Source,
+                isArchived = query.IsArchived,
+            }),
+            linkService.Create(nameof(CreateEntry), "create", HttpMethods.Post),
+            linkService.Create(nameof(CreateEntryBatch), "create-batch", HttpMethods.Post)
+        ];
+
+        if (!string.IsNullOrWhiteSpace(nextCursor))
+        {
+            links.Add(linkService.Create(nameof(GetEntriesCursor), "next-page", HttpMethods.Get, new 
+            {
+                cursor = nextCursor,
+                limit = query.Limit,
                 fields = query.Fields,
                 habitId = query.HabitId,
                 fromDate = query.FromDate,

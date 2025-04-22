@@ -15,6 +15,12 @@ interface GetEntriesOptions {
   page?: number;
   pageSize?: number;
   sort: string;
+  url?: string;
+}
+
+interface GetEntriesCursorOptions {
+  limit?: number;
+  url?: string;
 }
 
 export function useEntries() {
@@ -26,21 +32,44 @@ export function useEntries() {
     page = 1,
     pageSize = 10,
     sort,
+    url,
   }: GetEntriesOptions): Promise<EntriesResponse | null> => {
     if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await fetchWithAuth<EntriesResponse>(
-        `${API_BASE_URL}/entries?page=${page}&pageSize=${pageSize}&sort=${sort}`,
-        accessToken,
-        {
-          headers: {
-            Accept: 'application/vnd.dev-habit.hateoas+json',
-          },
-        }
-      );
+      const endpoint =
+        url || `${API_BASE_URL}/entries?page=${page}&pageSize=${pageSize}&sort=${sort}`;
+      const result = await fetchWithAuth<EntriesResponse>(endpoint, accessToken, {
+        headers: {
+          Accept: 'application/vnd.dev-habit.hateoas+json',
+        },
+      });
+      return result;
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch entries');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getEntriesCursor = async ({
+    limit = 10,
+    url,
+  }: GetEntriesCursorOptions): Promise<EntriesResponse | null> => {
+    if (!accessToken) return null;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const endpoint = url || `${API_BASE_URL}/entries/cursor?limit=${limit}`;
+      const result = await fetchWithAuth<EntriesResponse>(endpoint, accessToken, {
+        headers: {
+          Accept: 'application/vnd.dev-habit.hateoas+json',
+        },
+      });
       return result;
     } catch (err: any) {
       setError(err.message || 'Failed to fetch entries');
@@ -217,6 +246,7 @@ export function useEntries() {
 
   return {
     getEntries,
+    getEntriesCursor,
     getEntry,
     createEntry,
     createBatchEntries,
