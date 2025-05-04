@@ -15,4 +15,6 @@ public class Entry
     public DateTime? UpdatedAtUtc { get; set; }
 
     public Habit Habit { get; set; }
+
+    public static string NewId() => $"e-{Guid.CreateVersion7()}";
 }

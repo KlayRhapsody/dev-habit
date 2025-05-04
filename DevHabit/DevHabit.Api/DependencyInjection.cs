@@ -316,6 +316,13 @@ public static class DependencyInjection
                             .RepeatForever();
                     });
             });
+
+            q.AddJob<CleanupEntryImportJobsJob>(opts => opts.WithIdentity("cleanup-entry-imports"));
+
+            q.AddTrigger(opts => opts
+                .ForJob("cleanup-entry-imports")
+                .WithIdentity("cleanup-entry-imports-trigger")
+                .WithCronSchedule("0 0 3 * * ?", x => x.InTimeZone(TimeZoneInfo.Utc)));
         });
 
         builder.Services.AddQuartzHostedService(options =>

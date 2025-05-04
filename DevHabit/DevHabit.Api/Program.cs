@@ -14,7 +14,7 @@ builder
     .AddApplicationServices()
     .AddAuthenticationServices()
     .AddCorsPolicy()
-    // .AddBackgroundJobs();
+    .AddBackgroundJobs()
     .AddRateLimiting();
     
 WebApplication app = builder.Build();
