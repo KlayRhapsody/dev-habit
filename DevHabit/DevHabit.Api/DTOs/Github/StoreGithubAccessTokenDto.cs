@@ -1,4 +1,4 @@
-namespace DevHabit.Api.Services;
+namespace DevHabit.Api.DTOs.Github;
 
 public sealed record StoreGithubAccessTokenDto
 {

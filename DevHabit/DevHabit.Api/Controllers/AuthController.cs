@@ -4,6 +4,7 @@ using DevHabit.Api.DTOs.Users;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Services;
 using DevHabit.Api.Settings;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +27,12 @@ public sealed class AuthController(
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
     [HttpPost("register")]
-    public async Task<ActionResult<AccessTokenDto>> Register(RegisterUserDto registerUserDto)
+    public async Task<ActionResult<AccessTokenDto>> Register(
+        RegisterUserDto registerUserDto,
+        IValidator<RegisterUserDto> validator)
     {
+        await validator.ValidateAndThrowAsync(registerUserDto);
+
         using IDbContextTransaction transaction = await appIdentityDbContext.Database.BeginTransactionAsync();
         appDbContext.Database.SetDbConnection(appIdentityDbContext.Database.GetDbConnection());
         await appDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
@@ -98,8 +103,12 @@ public sealed class AuthController(
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<AccessTokenDto>> Login(LoginUserDto loginUserDto)
+    public async Task<ActionResult<AccessTokenDto>> Login(
+        LoginUserDto loginUserDto,
+        IValidator<LoginUserDto> validator)
     {
+        await validator.ValidateAndThrowAsync(loginUserDto);
+        
         IdentityUser? identityUser = await userManager.FindByEmailAsync(loginUserDto.Email);
 
         if (identityUser is null || !await userManager.CheckPasswordAsync(identityUser, loginUserDto.Password))
@@ -126,8 +135,12 @@ public sealed class AuthController(
     }
 
     [HttpPost("refresh")]
-    public async Task<ActionResult<AccessTokenDto>> Refresh(RefreshTokenDto refreshTokenDto)
+    public async Task<ActionResult<AccessTokenDto>> Refresh(
+        RefreshTokenDto refreshTokenDto,
+        IValidator<RefreshTokenDto> validator)
     {
+        await validator.ValidateAndThrowAsync(refreshTokenDto);
+        
         RefreshToken? refreshToken = await appIdentityDbContext.RefreshTokens
             .Include(rt => rt.User)
             .FirstOrDefaultAsync(rt => rt.Token == refreshTokenDto.RefreshToken);

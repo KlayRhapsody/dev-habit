@@ -222,8 +222,13 @@ public sealed class HabitsController(
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateHabit(string id, UpdateHabitDto updateHabitDto)
+    public async Task<ActionResult> UpdateHabit(
+        string id, 
+        UpdateHabitDto updateHabitDto,
+        IValidator<UpdateHabitDto> validator)
     {
+        await validator.ValidateAndThrowAsync(updateHabitDto);
+        
         string? userId = await userContext.GetUserIdAsync();
         if (string.IsNullOrWhiteSpace(userId))
         {

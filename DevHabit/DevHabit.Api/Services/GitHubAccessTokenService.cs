@@ -1,5 +1,6 @@
 
 using DevHabit.Api.Database;
+using DevHabit.Api.DTOs.Github;
 using DevHabit.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 

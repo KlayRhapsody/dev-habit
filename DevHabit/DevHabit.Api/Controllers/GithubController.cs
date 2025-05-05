@@ -2,6 +2,7 @@ using DevHabit.Api.DTOs.Common;
 using DevHabit.Api.DTOs.Github;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry.Trace;
@@ -19,8 +20,12 @@ public sealed class GithubController(
 ) : ControllerBase
 {
     [HttpPut("personal-access-token")]
-    public async Task<IActionResult> StoreAccessToken(StoreGithubAccessTokenDto storeGithubAccessTokenDto)
+    public async Task<IActionResult> StoreAccessToken(
+        StoreGithubAccessTokenDto storeGithubAccessTokenDto,
+        IValidator<StoreGithubAccessTokenDto> validator)
     {
+        await validator.ValidateAndThrowAsync(storeGithubAccessTokenDto);
+
         string? userId = await userContext.GetUserIdAsync();
         if (string.IsNullOrWhiteSpace(userId))
         {
