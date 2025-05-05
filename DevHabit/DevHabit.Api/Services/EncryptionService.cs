@@ -36,11 +36,11 @@ public sealed class EncryptionService(IOptions<EncryptionOptions> options)
         }
     }
 
-    public string Decrypt(string chipertText)
+    public string Decrypt(string cipherText)
     {
         try
         {
-            byte[] chiperData = Convert.FromBase64String(chipertText);
+            byte[] chiperData = Convert.FromBase64String(cipherText);
 
             if (chiperData.Length < IVSize)
             {
@@ -69,6 +69,10 @@ public sealed class EncryptionService(IOptions<EncryptionOptions> options)
         catch (CryptographicException ex)
         {
             throw new InvalidOperationException("Failed to decrypt the text", ex);
+        }
+        catch (FormatException ex)
+        {
+            throw new InvalidOperationException("Invalid cipher text format", ex);
         }
     }
 }
