@@ -185,7 +185,7 @@ public static class DependencyInjection
             .AddHttpClient("github")
             .ConfigureHttpClient(client =>
             {
-                client.BaseAddress = new Uri("https://api.github.com");
+                client.BaseAddress = new Uri(builder.Configuration.GetSection("Github:BaseUrl").Get<string>()!);
 
                 client.DefaultRequestHeaders
                     .Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
@@ -200,7 +200,10 @@ public static class DependencyInjection
             {
                 ContentSerializer = new NewtonsoftJsonContentSerializer()
             })
-            .ConfigureHttpClient(client => client.BaseAddress = new Uri("https://api.github.com"));
+            .ConfigureHttpClient(client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration.GetSection("Github:BaseUrl").Get<string>()!);
+            });
             // 模擬延遲回應
             // .AddHttpMessageHandler<DelayHandler>();
             // 建議使用預設的 resilience handler

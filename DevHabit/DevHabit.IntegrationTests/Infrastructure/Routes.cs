@@ -13,4 +13,12 @@ public static class Routes
     {
         public const string Create = "habits";
     }
+
+    public static class Github
+    {
+        public const string StoreAccessToken = "github/personal-access-token";
+        public const string RevokeAccessToken = "github/personal-access-token";
+        public const string GetProfile = "github/profile";
+        public const string GetEvents = "github/events";
+    }
 }

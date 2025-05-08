@@ -27,7 +27,7 @@ public sealed class RefitGitHubService(
         return response.Content;
     }
 
-    public async Task<IReadOnlyList<GitHubEventDto>?> GetUseEventsAsync(
+    public async Task<IReadOnlyList<GitHubEventDto>?> GetUserEventsAsync(
         string username,
         string accessToken,
         int page = 1,
@@ -37,7 +37,7 @@ public sealed class RefitGitHubService(
         ArgumentException.ThrowIfNullOrEmpty(accessToken);
         ArgumentException.ThrowIfNullOrEmpty(username);
         
-        ApiResponse<List<GitHubEventDto>> response = await githubApi.GetUseEvents(
+        ApiResponse<List<GitHubEventDto>> response = await githubApi.GetUserEvents(
             username, 
             accessToken, 
             page, 

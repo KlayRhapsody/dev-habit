@@ -12,7 +12,7 @@ public interface IGithubApi
         CancellationToken cancellationToken = default);
 
     [Get("/users/{username}/events")]
-    Task<ApiResponse<List<GitHubEventDto>>> GetUseEvents(
+    Task<ApiResponse<List<GitHubEventDto>>> GetUserEvents(
         string username,
         [Authorize(scheme: "Bearer")] string accessToken,
         int page = 1,

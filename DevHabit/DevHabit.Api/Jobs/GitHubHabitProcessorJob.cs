@@ -63,7 +63,7 @@ public class GitHubHabitProcessorJob(
             
             for (int i = 1; i <= pagesToFetch; i++)
             {
-                IReadOnlyList<GitHubEventDto>? pageEvents = await gitHubService.GetUseEventsAsync(
+                IReadOnlyList<GitHubEventDto>? pageEvents = await gitHubService.GetUserEventsAsync(
                 username: profile.Login,
                 accessToken: accessToken,
                 page: pagesToFetch,

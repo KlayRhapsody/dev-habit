@@ -28,7 +28,7 @@ public sealed class GitHubService(
         return JsonConvert.DeserializeObject<GitHubUserProfileDto>(content);
     }
 
-    public async Task<IReadOnlyList<GitHubEventDto>?> GetUseEventsAsync(
+    public async Task<IReadOnlyList<GitHubEventDto>?> GetUserEventsAsync(
         string username,
         string accessToken,
         int page = 1,
