@@ -81,7 +81,11 @@ public sealed class GitHubTests(DevHabitWebAppFactory factory) : IntegrationTest
             ExpiresInDays = 30
         };
 
-        await client.PutAsJsonAsync(Routes.Github.StoreAccessToken, dto);
+        Console.WriteLine($"WireMock Url: {WireMockServer.Urls[0]}");
+
+        HttpResponseMessage updateAccessTokenResponse = await client.PutAsJsonAsync(Routes.Github.StoreAccessToken, dto);
+
+        updateAccessTokenResponse.EnsureSuccessStatusCode();
 
         // Act
         HttpResponseMessage response = await client.GetAsync(Routes.Github.GetProfile);

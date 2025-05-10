@@ -55,6 +55,7 @@ public sealed class AuthController(
             };
             return Problem(
                 detail: "Unable to register user, please try again",
+                statusCode: StatusCodes.Status400BadRequest,
                 extensions: extensions
             );
         }
