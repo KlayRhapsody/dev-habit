@@ -102,6 +102,46 @@
                 "enableDebugging": true,
                 "configureSsl": true
             }
+        },
+        {
+            "label": "docker-compose: debug",
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                "compose",
+                "-f",
+                "${workspaceFolder}/DevHabit/docker-compose.debug.yml",
+                "up",
+                "--build",
+                "-d"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "detail": "在 Debug 模式下透過 Docker Compose 啟動 DevHabit.Api 及其相依服務"
+        },
+        {
+            "label": "docker-compose: down",
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                "compose",
+                "-f",
+                "${workspaceFolder}/DevHabit/docker-compose.debug.yml",
+                "down"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "detail": "停止並移除所有 Docker Compose 啟動的容器"
         }
     ]
 }

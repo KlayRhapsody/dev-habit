@@ -1,0 +1,52 @@
+services:
+  devhabit.api:
+    image: ${DOCKET_REGISTRY-}devhabitapi-debug
+    build:
+      context: .
+      dockerfile: DevHabit.Api/Dockerfile.debug
+    ports:
+      - 5000:8080
+      - 5001:8081
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://devhabit.aspire-dashboard:18889
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetcore.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=${ASPNETCORE_Kestrel__Certificates__Default__Password} 
+    volumes:
+      - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
+      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
+      # 不要覆蓋容器中的編譯檔案，而是共享原始碼以便於偵錯
+      - ./DevHabit.Api:/src/DevHabit.Api:ro
+    depends_on:
+      - devhabit.postgres
+
+  devhabit.postgres:
+    image: postgres:17.2
+    environment:
+      POSTGRES_DB: devhabit
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./.containers/postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+  
+  devhabit.seq:
+    image: datalust/seq:2024.3
+    environment:
+      ACCEPT_EULA: Y
+    volumes:
+      - ./.containers/seq_data:/data
+    ports:
+      - 8080:80
+      - 5341:5341
+
+  devhabit.aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: true
+    ports:
+      - 18888:18888

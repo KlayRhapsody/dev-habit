@@ -34,6 +34,24 @@
             "netCore": {
                 "appProject": "${workspaceFolder}/DevHabit/DevHabit.Api/DevHabit.Api.csproj"
             }
+        },
+        {
+            "name": "Docker Compose: Debug",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickRemoteProcess}",
+            "preLaunchTask": "docker-compose: debug",
+            "pipeTransport": {
+                "pipeProgram": "docker",
+                "pipeArgs": ["exec", "-i", "devhabit-devhabit.api-1"],
+                "debuggerPath": "/vsdbg/vsdbg",
+                "pipeCwd": "${workspaceFolder}",
+                "quoteArgs": false
+            },
+            "sourceFileMap": {
+                "/src": "${workspaceFolder}/DevHabit"
+            },
+            "postDebugTask": "docker-compose: down"
         }
     ]
 }
