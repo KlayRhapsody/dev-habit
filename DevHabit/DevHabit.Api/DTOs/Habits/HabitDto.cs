@@ -7,7 +7,8 @@ namespace DevHabit.Api.DTOs.Habits;
 public sealed record HabitDto : ILinksResponse
 {
     public required string Id { get; init; }
-    public required string Name { get; init; } = string.Empty;
+    public required string UserId { get; init; }
+    public required string Name { get; init; }
     public string? Description { get; init; }
     public required HabitType Type { get; init; }
     public required FrequencyDto Frequency { get; init; }
@@ -16,11 +17,11 @@ public sealed record HabitDto : ILinksResponse
     public required bool IsArchived { get; init; }
     public DateOnly? EndDate { get; init; }
     public MilestoneDto? Milestone { get; init; }
+    public AutomationSource? AutomationSource { get; init; }
     public required DateTime CreatedAtUtc { get; init; }
     public DateTime? UpdatedAtUtc { get; init; }
     public DateTime? LastCompletedAtUtc { get; init; }
-    public List<LinkDto> Links { get; set; }
-    public AutomationSource? AutomationSource { get; init; }
+    public List<LinkDto> Links { get; set; } = [];
 }
 
 public sealed record FrequencyDto

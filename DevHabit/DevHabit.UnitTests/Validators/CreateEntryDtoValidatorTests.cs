@@ -109,7 +109,7 @@ public sealed class CreateEntryDtoValidatorTests
             HabitId = Habit.NewId(),
             Value = 1,
             Date = DateOnly.FromDateTime(DateTime.UtcNow),
-            Note = null
+            Notes = null
         };
 
         // Act
@@ -128,13 +128,13 @@ public sealed class CreateEntryDtoValidatorTests
             HabitId = Habit.NewId(),
             Value = 1,
             Date = DateOnly.FromDateTime(DateTime.UtcNow),
-            Note = new string('a', 1001)
+            Notes = new string('a', 1001)
         };
 
         // Act
         TestValidationResult<CreateEntryDto>? result = await _validator.TestValidateAsync(dto);
     
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Note);
+        result.ShouldHaveValidationErrorFor(x => x.Notes);
     }
 }

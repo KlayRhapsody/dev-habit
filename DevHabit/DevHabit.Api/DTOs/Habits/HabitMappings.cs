@@ -38,6 +38,7 @@ internal static class HabitMappings
         var habitDto = new HabitDto
         {
             Id = habit.Id,
+            UserId = habit.UserId,
             Name = habit.Name,
             Description = habit.Description,
             Type = habit.Type,

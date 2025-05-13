@@ -22,7 +22,7 @@ public static class EntryMappings
             HabitId = dto.HabitId,
             UserId = userId,
             Value = dto.Value,
-            Notes = dto.Note,
+            Notes = dto.Notes,
             Date = dto.Date,
             Source = EntrySource.Manual,
             CreatedAtUtc = DateTime.UtcNow,

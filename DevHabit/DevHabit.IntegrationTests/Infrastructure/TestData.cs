@@ -53,7 +53,32 @@ public static class TestData
             HabitId = habitId,
             Date = DateOnly.FromDateTime(DateTime.UtcNow),
             Value = value,
-            Note = note
+            Notes = note
+        };
+
+        public static CreateEntryDto CreateEntryForDate(string habitId, DateOnly date, int value = 10, string? note = null) => new()
+        {
+            HabitId = habitId,
+            Date = date,
+            Value = value,
+            Notes = note
+        };
+
+        public static UpdateEntryDto CreateUpdateEntry(int value = 20, string? note = "Updated note") => new()
+        {
+            Date = DateOnly.FromDateTime(DateTime.UtcNow),
+            Value = value,
+            Notes = note
+        };
+
+        public static CreateEntryBatchDto CreateEntryBatch(string habitId, params (DateOnly date, int value)[] entries) => new()
+        {
+            Entries = entries.Select(e => new CreateEntryDto
+            {
+                HabitId = habitId,
+                Date = e.date,
+                Value = e.value
+            }).ToList()
         };
     }
 }

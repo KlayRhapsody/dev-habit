@@ -10,6 +10,7 @@ internal static class HabitQueries
         return h => new HabitDto
         {
             Id = h.Id,
+            UserId = h.UserId,
             Name = h.Name,
             Description = h.Description,
             Type = h.Type,

@@ -14,9 +14,9 @@ public sealed class CreateEntryDtoValidator : AbstractValidator<CreateEntryDto>
             .GreaterThan(0)
             .WithMessage("Value must be greater than 0.");
 
-        RuleFor(entry => entry.Note)
+        RuleFor(entry => entry.Notes)
             .MaximumLength(1000)
-            .When(entry => entry.Note is not null)
+            .When(entry => entry.Notes is not null)
             .WithMessage("Note must be less than 1000 characters.");
 
         RuleFor(entry => entry.Date)
