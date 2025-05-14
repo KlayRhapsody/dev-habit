@@ -299,10 +299,7 @@ public static class DependencyInjection
     {
         builder.Services.AddQuartz(q =>
         {
-            q.AddJob<GitHubAutomationSchedulerJob>(options =>
-            {
-                options.WithIdentity("github-automation-scheduler");
-            });
+            q.AddJob<GitHubAutomationSchedulerJob>(opts => opts.WithIdentity("github-automation-scheduler"));
 
             q.AddTrigger(options =>
             {
@@ -328,10 +325,7 @@ public static class DependencyInjection
                 .WithCronSchedule("0 0 3 * * ?", x => x.InTimeZone(TimeZoneInfo.Utc)));
         });
 
-        builder.Services.AddQuartzHostedService(options =>
-        {
-            options.WaitForJobsToComplete = true;
-        });
+        builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
         return builder;
     }

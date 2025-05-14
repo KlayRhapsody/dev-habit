@@ -369,6 +369,9 @@ dotnet_diagnostic.CS8603.severity = none
 # CS8618: Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 dotnet_diagnostic.CS8618.severity = none
 
+# CS9107: Parameter is captured into the state of the enclosing type and its value is also passed to the base constructor. The value might be captured by the base class as well.
+dotnet_diagnostic.CS9107.severity = none
+
 # IDE Code Analyzers rules
 
 # IDE0005: Remove unnecessary using directives

@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.Abstractions;
 using Testcontainers.PostgreSql;
 using WireMock.Server;
 
@@ -26,6 +29,8 @@ public sealed class DevHabitWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         builder.UseSetting("ConnectionStrings:Database", _postgreSqlContainer.GetConnectionString());
         builder.UseSetting("Github:BaseUrl", _wireMockServer.Urls[0]);
+
+        Quartz.Logging.LogContext.SetCurrentLogProvider(NullLoggerFactory.Instance);
     }
 
     public async Task InitializeAsync()

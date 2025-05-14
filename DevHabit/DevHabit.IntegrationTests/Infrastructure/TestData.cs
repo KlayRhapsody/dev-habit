@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using DevHabit.Api.DTOs.Entries;
 using DevHabit.Api.DTOs.Habits;
+using DevHabit.Api.DTOs.HabitTags;
+using DevHabit.Api.DTOs.Tags;
 using DevHabit.Api.Entities;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -79,6 +81,27 @@ public static class TestData
                 Date = e.date,
                 Value = e.value
             }).ToList()
+        };
+    }
+
+    public static class Tags
+    {
+        public static CreateTagDto CreateImportantTag() => new()
+        {
+            Name = "Important"
+        };
+
+        public static CreateTagDto CreateProductivityTag() => new()
+        {
+            Name = "Productivity"
+        };
+    }
+
+    public static class HabitTags
+    {
+        public static UpsertHabitTagsDto CreateUpsertDto(params string[] tagIds) => new()
+        {
+            TagIds = tagIds.ToList()
         };
     }
 }

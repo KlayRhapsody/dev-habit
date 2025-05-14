@@ -15,7 +15,8 @@ using WireMock.Server;
 namespace DevHabit.IntegrationTests.Infrastructure;
 
 // [Collection(nameof(IntegrationTestCollection))]
-public abstract class IntegrationTestFixture(DevHabitWebAppFactory factory) : IClassFixture<DevHabitWebAppFactory>
+public abstract class IntegrationTestFixture(DevHabitWebAppFactory factory)
+    : IClassFixture<DevHabitWebAppFactory>
 {
     private HttpClient? _authorizedClient;
     public HttpClient CreateClient() => factory.CreateClient();

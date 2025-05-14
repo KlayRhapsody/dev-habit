@@ -9,9 +9,9 @@ namespace DevHabit.Api.Jobs;
 
 public class GitHubHabitProcessorJob(
     ApplicationDbContext dbContext,
-    ILogger<GitHubHabitProcessorJob> logger,
     GitHubAccessTokenService gitHubAccessTokenService,
-    RefitGitHubService gitHubService) : IJob
+    RefitGitHubService gitHubService,
+    ILogger<GitHubHabitProcessorJob> logger) : IJob
 {
     private const string PushEvent = "PushEvent";
 

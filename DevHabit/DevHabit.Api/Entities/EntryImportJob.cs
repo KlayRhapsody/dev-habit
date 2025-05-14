@@ -16,5 +16,5 @@ public sealed class EntryImportJob
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? CompletedAtUtc { get; set; }
 
-    public static string NewId() => $"ei-{Guid.CreateVersion7()}";
+    public static string NewId() => $"ei_{Guid.CreateVersion7()}";
 }

@@ -33,7 +33,7 @@ public sealed class GitHubAutomationSchedulerJob(
                     .UsingJobData("habitId", habit.Id)
                     .Build();
 
-                await context.Scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken);
+                await context.Scheduler.ScheduleJob(jobDetail, trigger);
                 
                 logger.LogInformation("Scheduled processor job for habit {HabitId}", habit.Id);
             }

@@ -32,7 +32,8 @@ namespace DevHabit.Api.Controllers;
 public sealed class TagsController(
     ApplicationDbContext dbContext, 
     LinkService linkService,
-    UserContext userContext) : ControllerBase
+    UserContext userContext,
+    IOptions<TagsOptions> options) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<TagsCollectionDto>> GetTags(
@@ -117,6 +118,13 @@ public sealed class TagsController(
             problem.Extensions.Add("errors", validationResult.ToDictionary());
 
             return BadRequest(problem);
+        }
+
+        if (await dbContext.Tags.CountAsync(t => t.UserId == userId) >= options.Value.MaxAllowedTags)
+        {
+            return Problem(
+                detail: "Reached the maximum number of allowed tags",
+                statusCode: StatusCodes.Status400BadRequest);
         }
 
         Tag tag = createTagDto.ToEntity(userId);

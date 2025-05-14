@@ -16,5 +16,5 @@ public class Entry
 
     public Habit Habit { get; set; }
 
-    public static string NewId() => $"e-{Guid.CreateVersion7()}";
+    public static string NewId() => $"e_{Guid.CreateVersion7()}";
 }
