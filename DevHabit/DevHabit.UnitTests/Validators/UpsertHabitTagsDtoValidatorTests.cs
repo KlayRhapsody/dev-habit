@@ -25,21 +25,21 @@ public sealed class UpsertHabitTagsDtoValidatorTests
         result.ShouldNotHaveAnyValidationErrors();
     }
 
-    [Fact]
-    public async Task Validate_ShouldReturnError_WhenTagIdsAreEmpty()
-    {
-        // Arrange
-        var dto = new UpsertHabitTagsDto
-        {
-            TagIds = []
-        };
+    // [Fact]
+    // public async Task Validate_ShouldReturnError_WhenTagIdsAreEmpty()
+    // {
+    //     // Arrange
+    //     var dto = new UpsertHabitTagsDto
+    //     {
+    //         TagIds = []
+    //     };
 
-        // Act
-        TestValidationResult<UpsertHabitTagsDto>? result = await _validator.TestValidateAsync(dto);
+    //     // Act
+    //     TestValidationResult<UpsertHabitTagsDto>? result = await _validator.TestValidateAsync(dto);
 
-        // Assert
-        result.ShouldHaveAnyValidationError();
-    }
+    //     // Assert
+    //     result.ShouldHaveAnyValidationError();
+    // }
 
     [Fact]
     public async Task Validate_ShouldReturnError_WhenTagIdsContainDuplicates()

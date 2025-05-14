@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -30,6 +31,7 @@ public sealed class DevHabitWebAppFactory : WebApplicationFactory<Program>, IAsy
         builder.UseSetting("ConnectionStrings:Database", _postgreSqlContainer.GetConnectionString());
         builder.UseSetting("Github:BaseUrl", _wireMockServer.Urls[0]);
 
+        builder.UseSetting("Encryption:Key", Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)));
         Quartz.Logging.LogContext.SetCurrentLogProvider(NullLoggerFactory.Instance);
     }
 

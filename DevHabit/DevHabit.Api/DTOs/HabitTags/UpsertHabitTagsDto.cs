@@ -7,5 +7,5 @@ namespace DevHabit.Api.DTOs.HabitTags;
 
 public sealed record UpsertHabitTagsDto
 {
-    public List<string> TagIds { get; init; }
+    public required List<string> TagIds { get; init; }
 }
