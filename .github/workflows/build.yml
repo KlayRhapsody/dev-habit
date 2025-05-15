@@ -32,7 +32,7 @@ jobs:
         run: dotnet build DevHabit.sln --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test DevHabit.sln --configuration Release --no-restore --no-build
+        run: dotnet test DevHabit.sln --configuration Release --no-restore --no-build --verbosity normal
 
       - name: Publish
         run: dotnet publish DevHabit.sln --configuration Release --no-restore --no-build

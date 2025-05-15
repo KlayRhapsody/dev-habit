@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevHabit.UnitTests", "DevHa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevHabit.IntegrationTests", "DevHabit.IntegrationTests\DevHabit.IntegrationTests.csproj", "{3581BAF2-F677-4380-A524-8EFFBD72CD94}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevHabit.FunctionalTests", "DevHabit.FunctionalTests\DevHabit.FunctionalTests.csproj", "{852D610B-369E-4ADC-A714-2CF85ECE150C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{3581BAF2-F677-4380-A524-8EFFBD72CD94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3581BAF2-F677-4380-A524-8EFFBD72CD94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3581BAF2-F677-4380-A524-8EFFBD72CD94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{852D610B-369E-4ADC-A714-2CF85ECE150C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{852D610B-369E-4ADC-A714-2CF85ECE150C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{852D610B-369E-4ADC-A714-2CF85ECE150C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{852D610B-369E-4ADC-A714-2CF85ECE150C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
