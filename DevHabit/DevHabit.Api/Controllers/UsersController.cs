@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using System.Security.Claims;
 using DevHabit.Api.Database;
 using DevHabit.Api.DTOs.Common;
@@ -15,13 +16,28 @@ namespace DevHabit.Api.Controllers;
 [Authorize(Roles = Roles.Member)]
 [ApiController]
 [Route("users")]
+[Produces(
+    MediaTypeNames.Application.Json,
+    CustomMediaTypeNames.Application.JsonV1,
+    CustomMediaTypeNames.Application.HateoasJson,
+    CustomMediaTypeNames.Application.HateoasJsonV1)]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
 public sealed class UsersController(
     ApplicationDbContext dbContext,
     UserContext userContext,
     LinkService linkService) : ControllerBase
 {
-    [Authorize(Roles = Roles.Admin)]
+
+    /// <summary>
+    /// Get a user by their ID (Admin only)
+    /// </summary>
+    /// <param name="id">The user's unique identifier</param>
+    /// <returns>The user details</returns>
     [HttpGet("{id}")]
+    [Authorize(Roles = Roles.Admin)]
+    [ProducesResponseType<UserDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserDto>> GetUserById(string id)
     {
         string? userId = await userContext.GetUserIdAsync();
@@ -48,7 +64,14 @@ public sealed class UsersController(
         return Ok(user);
     }
 
+    /// <summary>
+    ///  Gets the currently authenticated user's profile
+    /// </summary>
+    /// <param name="acceptHeader">Controls HATEOAS link generation</param>
+    /// <returns>The current user's details</returns>
     [HttpGet("me")]
+    [ProducesResponseType<UserDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserDto>> GetCurrentUser([FromHeader] AcceptHeaderDto acceptHeader)
     {
         string? userId = await userContext.GetUserIdAsync();
@@ -75,7 +98,16 @@ public sealed class UsersController(
         return Ok(user);
     }
 
+    /// <summary>
+    /// Updates the current user's profile information
+    /// </summary>
+    /// <param name="updateUserProfileDto">The profile update details</param>
+    /// <param name="validator">Validator for the update request</param>
+    /// <returns>No content on success</returns>
     [HttpPut("me/profile")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> UpdateUserProfile(
         UpdateUserProfileDto updateUserProfileDto,
         IValidator<UpdateUserProfileDto> validator)

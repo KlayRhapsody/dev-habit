@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Threading.RateLimiting;
 using System.Threading.Tasks;
@@ -86,6 +87,10 @@ public static class DependencyInjection
         builder.Services.AddSwaggerGen(options =>
         {
             options.ResolveConflictingActions(description => description.First());
+
+            string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            options.IncludeXmlComments(xmlPath);
         });
 
         builder.Services.AddResponseCaching();

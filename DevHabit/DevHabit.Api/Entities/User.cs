@@ -8,6 +8,10 @@ public sealed class User
     public DateTime CreatedAtUTC { get; set; }
     public DateTime? UpdatedAtUTC { get; set; }
 
+    /// <summary>
+    /// We'll use this to store the IdentityId from the Identity Provider.
+    /// This could be any identity provider like Azure AD, Cognito, Keycloak, Auth0, etc.
+    /// </summary>
     public string IdentityId { get; set; }
 
     public static string NewId() => $"u_{Guid.CreateVersion7()}";

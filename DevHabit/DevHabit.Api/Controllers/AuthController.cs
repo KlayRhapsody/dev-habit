@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using DevHabit.Api.Database;
 using DevHabit.Api.DTOs.Auth;
 using DevHabit.Api.DTOs.Users;
@@ -17,6 +18,11 @@ namespace DevHabit.Api.Controllers;
 [ApiController]
 [Route("auth")]
 [AllowAnonymous]
+[Produces(
+    MediaTypeNames.Application.Json,
+    CustomMediaTypeNames.Application.JsonV1,
+    CustomMediaTypeNames.Application.HateoasJson,
+    CustomMediaTypeNames.Application.HateoasJsonV1)]
 public sealed class AuthController(
     UserManager<IdentityUser> userManager,
     ApplicationDbContext appDbContext,
@@ -26,7 +32,15 @@ public sealed class AuthController(
 {
     private readonly JwtAuthOptions _jwtAuthOptions = options.Value;
 
+    /// <summary>
+    /// Registers a new user account
+    /// </summary>
+    /// <param name="registerUserDto">The registration details</param>
+    /// <param name="validator">Validator for the registration request</param>
+    /// <returns>Access tokens for the newly registered user</returns>
     [HttpPost("register")]
+    [ProducesResponseType<AccessTokenDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AccessTokenDto>> Register(
         RegisterUserDto registerUserDto,
         IValidator<RegisterUserDto> validator)
@@ -103,7 +117,15 @@ public sealed class AuthController(
         return Ok(accessTokenDto);
     }
 
+    /// <summary>
+    /// Authenticates a user and returns access tokens
+    /// </summary>
+    /// <param name="loginUserDto">The login credentials</param>
+    /// <param name="validator">Validator for the login request</param>
+    /// <returns>Access tokens for the authenticated user</returns>
     [HttpPost("login")]
+    [ProducesResponseType<AccessTokenDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AccessTokenDto>> Login(
         LoginUserDto loginUserDto,
         IValidator<LoginUserDto> validator)
@@ -135,7 +157,15 @@ public sealed class AuthController(
         return Ok(accessTokenDto);
     }
 
+    /// <summary>
+    /// Refreshes the access token using a refresh token
+    /// </summary>
+    /// <param name="refreshTokenDto">The refresh token</param>
+    /// <param name="validator">Validator for the refresh token request</param>
+    /// <returns>New access tokens</returns>
     [HttpPost("refresh")]
+    [ProducesResponseType<AccessTokenDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AccessTokenDto>> Refresh(
         RefreshTokenDto refreshTokenDto,
         IValidator<RefreshTokenDto> validator)
