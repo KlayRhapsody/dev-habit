@@ -176,7 +176,8 @@ public sealed class HabitsController(
     /// <returns>The requested habit</returns>
     [HttpGet("{id}")]
     [ApiVersion(2.0)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<HabitWithTagsDtoV2>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetHabitV2(
         string id,
