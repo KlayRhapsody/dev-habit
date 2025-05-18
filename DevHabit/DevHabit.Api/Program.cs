@@ -20,17 +20,17 @@ builder
     
 WebApplication app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.MapScalarApiReference(options =>
+{
+    options.WithOpenApiRoutePattern("/swagger/1.0/swagger.json");
+});
+
 if (app.Environment.IsDevelopment())
 {
     // app.MapOpenApi();
-
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
-    app.MapScalarApiReference(options =>
-    {
-        options.WithOpenApiRoutePattern("/swagger/1.0/swagger.json");
-    });
 
     await app.ApplyMigrationsAsync();
 
