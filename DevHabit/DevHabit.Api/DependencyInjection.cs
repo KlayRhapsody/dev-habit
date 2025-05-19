@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using Asp.Versioning;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using DevHabit.Api.Database;
 using DevHabit.Api.DTOs.Entries;
 using DevHabit.Api.DTOs.Habits;
@@ -147,14 +148,22 @@ public static class DependencyInjection
             .WithMetrics(metric => metric
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
-                .AddRuntimeInstrumentation())
-            .UseOtlpExporter();
+                .AddRuntimeInstrumentation());
 
         builder.Logging.AddOpenTelemetry(options =>
         {
             options.IncludeScopes = true;
             options.IncludeFormattedMessage = true;
         });
+
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+        }
+        else
+        {
+            builder.Services.AddOpenTelemetry().UseAzureMonitor();
+        }
 
         return builder;
     }
