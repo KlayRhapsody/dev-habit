@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - never-trigger-this
 
 env:
   DOTNET_VERSION: "9.x"
@@ -36,6 +36,3 @@ jobs:
 
       - name: Publish
         run: dotnet publish DevHabit.sln --configuration Release --no-restore --no-build
-      
-
-  
