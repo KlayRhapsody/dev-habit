@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { HiUser, HiCog8Tooth, HiArrowRightOnRectangle } from 'react-icons/hi2';
 import { useAuth0 } from '@auth0/auth0-react';
 

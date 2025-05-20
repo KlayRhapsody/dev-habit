@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SignupForm from './SignupForm';
-import { register } from '../../api/auth';
 // import { useAuth } from '../../context/AuthContext';
 
 export default function Signup() {
@@ -10,10 +9,10 @@ export default function Signup() {
   // const { login } = useAuth();
 
   const handleSignup = async (
-    name: string,
-    email: string,
-    password: string,
-    confirmPassword: string
+    _name: string,
+    _email: string,
+    _password: string,
+    _confirmPassword: string
   ) => {
     try {
       setError(null);
