@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth0 } from '@auth0/auth0-react';
 import { API_BASE_URL } from '../../api/config';
 import type { EntryImportJob, EntryImportJobsResponse } from './types';
 import { fetchWithAuth } from '../../utils/fetchUtils';
@@ -11,7 +11,7 @@ interface ListImportsOptions {
 }
 
 export function useEntryImports() {
-  const { accessToken } = useAuth();
+  const { getAccessTokenSilently } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,11 +19,11 @@ export function useEntryImports() {
     pageSize = 10,
     url,
   }: ListImportsOptions = {}): Promise<EntryImportJobsResponse | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<EntryImportJobsResponse>(
         url ?? `${API_BASE_URL}/entries/imports?pageSize=${pageSize}`,
         accessToken,
@@ -43,7 +43,6 @@ export function useEntryImports() {
   };
 
   const uploadFile = async (file: File): Promise<EntryImportJob | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
@@ -51,6 +50,7 @@ export function useEntryImports() {
       const formData = new FormData();
       formData.append('file', file);
 
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<EntryImportJob>(
         `${API_BASE_URL}/entries/imports`,
         accessToken,
@@ -73,7 +73,6 @@ export function useEntryImports() {
   };
 
   const getImport = async (link: Link): Promise<EntryImportJob | null> => {
-    if (!accessToken) return null;
     if (link.rel !== 'self' || link.method !== 'GET') {
       throw new Error('Invalid operation: Link does not support fetching import job');
     }
@@ -82,6 +81,7 @@ export function useEntryImports() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<EntryImportJob>(link.href, accessToken, {
         headers: {
           Accept: 'application/vnd.dev-habit.hateoas+json',

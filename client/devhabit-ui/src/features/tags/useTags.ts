@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth0 } from '@auth0/auth0-react';
 import { API_BASE_URL } from '../../api/config';
 import { fetchWithAuth } from '../../utils/fetchUtils';
 import type { Link } from '../../types/api';
@@ -22,16 +22,16 @@ interface CreateTagDto {
 }
 
 export function useTags() {
-  const { accessToken } = useAuth();
+  const { getAccessTokenSilently } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const getTags = async (): Promise<TagsResponse | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<TagsResponse>(`${API_BASE_URL}/tags`, accessToken, {
         headers: {
           Accept: 'application/vnd.dev-habit.hateoas+json',
@@ -47,11 +47,11 @@ export function useTags() {
   };
 
   const createTag = async (data: CreateTagDto): Promise<Tag | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<Tag>(`${API_BASE_URL}/tags`, accessToken, {
         method: 'POST',
         headers: {
@@ -70,7 +70,6 @@ export function useTags() {
   };
 
   const updateTag = async (link: Link, data: CreateTagDto): Promise<boolean> => {
-    if (!accessToken) return false;
     if (link.rel !== 'update' || link.method !== 'PUT') {
       throw new Error('Invalid operation: Link does not support updating tag');
     }
@@ -79,6 +78,7 @@ export function useTags() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       await fetchWithAuth<Tag>(link.href, accessToken, {
         method: link.method,
         headers: {
@@ -97,7 +97,6 @@ export function useTags() {
   };
 
   const deleteTag = async (link: Link): Promise<boolean> => {
-    if (!accessToken) return false;
     if (link.rel !== 'delete' || link.method !== 'DELETE') {
       throw new Error('Invalid operation: Link does not support deleting tag');
     }
@@ -106,6 +105,7 @@ export function useTags() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       await fetchWithAuth(link.href, accessToken, {
         method: link.method,
       });
@@ -119,7 +119,6 @@ export function useTags() {
   };
 
   const upsertHabitTags = async (link: Link, tagIds: string[]): Promise<void> => {
-    if (!accessToken) return;
     if (link.rel !== 'upsert-tags' || link.method !== 'PUT') {
       throw new Error('Invalid operation: Link does not support tag update');
     }
@@ -128,6 +127,7 @@ export function useTags() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       await fetchWithAuth(link.href, accessToken, {
         method: link.method,
         headers: {

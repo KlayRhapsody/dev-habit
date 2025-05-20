@@ -1,9 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import { AuthProvider } from './context/AuthContext';
 import Login from './features/auth/Login';
-import Signup from './features/auth/Signup';
 import Dashboard from './pages/Dashboard';
 import Profile from './features/users/Profile';
 import { CreateHabitPage } from './features/habits/CreateHabitPage';
@@ -16,15 +14,23 @@ import { CreateEntryPage } from './features/entries/CreateEntryPage';
 import { EditEntryPage } from './features/entries/EditEntryPage';
 import { CreateBatchEntriesPage } from './features/entries/CreateBatchEntriesPage';
 import { EntryImportsPage } from './features/entries/EntryImportsPage';
+import { Auth0Provider } from '@auth0/auth0-react';
 
 export default function App() {
   return (
-    <AuthProvider>
+    <Auth0Provider
+      domain={import.meta.env.VITE_AUTH0_DOMAIN}
+      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
+      authorizationParams={{
+        redirect_uri: window.location.origin,
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+        scope: 'openid profile email',
+      }}
+    >
       <BrowserRouter>
-        <Routes>
-          {/* Auth routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Routes>
+            {/* Auth routes */}
+            <Route path="/login" element={<Login />} />
 
           {/* Protected routes */}
           <Route
@@ -53,6 +59,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+    </Auth0Provider>
   );
 }

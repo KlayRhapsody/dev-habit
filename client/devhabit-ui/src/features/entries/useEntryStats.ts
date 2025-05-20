@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth0 } from '@auth0/auth0-react';
 import { API_BASE_URL } from '../../api/config';
 import { fetchWithAuth } from '../../utils/fetchUtils';
 
@@ -16,16 +16,16 @@ export interface EntryStats {
 }
 
 export function useEntryStats() {
-  const { accessToken } = useAuth();
+  const { getAccessTokenSilently } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const getStats = async (): Promise<EntryStats | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<EntryStats>(`${API_BASE_URL}/entries/stats`, accessToken, {
         headers: {
           Accept: 'application/vnd.dev-habit.hateoas+json',

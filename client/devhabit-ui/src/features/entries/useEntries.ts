@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth0 } from '@auth0/auth0-react';
 import { API_BASE_URL } from '../../api/config';
 import {
   CreateEntryDto,
@@ -24,7 +24,7 @@ interface GetEntriesCursorOptions {
 }
 
 export function useEntries() {
-  const { accessToken } = useAuth();
+  const { getAccessTokenSilently } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,11 +34,11 @@ export function useEntries() {
     sort,
     url,
   }: GetEntriesOptions): Promise<EntriesResponse | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const endpoint =
         url || `${API_BASE_URL}/entries?page=${page}&pageSize=${pageSize}&sort=${sort}`;
       const result = await fetchWithAuth<EntriesResponse>(endpoint, accessToken, {
@@ -59,11 +59,11 @@ export function useEntries() {
     limit = 10,
     url,
   }: GetEntriesCursorOptions): Promise<EntriesResponse | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const endpoint = url || `${API_BASE_URL}/entries/cursor?limit=${limit}`;
       const result = await fetchWithAuth<EntriesResponse>(endpoint, accessToken, {
         headers: {
@@ -80,11 +80,11 @@ export function useEntries() {
   };
 
   const getEntry = async (id: string): Promise<Entry | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<Entry>(`${API_BASE_URL}/entries/${id}`, accessToken, {
         headers: {
           Accept: 'application/vnd.dev-habit.hateoas+json',
@@ -100,11 +100,11 @@ export function useEntries() {
   };
 
   const createEntry = async (data: CreateEntryDto): Promise<Entry | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<Entry>(`${API_BASE_URL}/entries`, accessToken, {
         method: 'POST',
         headers: {
@@ -126,7 +126,6 @@ export function useEntries() {
     link: Link,
     data: CreateBatchEntriesDto
   ): Promise<Entry[] | null> => {
-    if (!accessToken) return null;
     if (link.rel !== 'create-batch' || link.method !== 'POST') {
       throw new Error('Invalid operation: Link does not support batch entry creation');
     }
@@ -135,6 +134,7 @@ export function useEntries() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<Entry[]>(link.href, accessToken, {
         method: link.method,
         headers: {
@@ -153,7 +153,6 @@ export function useEntries() {
   };
 
   const updateEntry = async (link: Link, data: UpdateEntryDto): Promise<boolean> => {
-    if (!accessToken) return false;
     if (link.rel !== 'update' || link.method !== 'PUT') {
       throw new Error('Invalid operation: Link does not support updating entry');
     }
@@ -162,6 +161,7 @@ export function useEntries() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       await fetchWithAuth<Entry>(link.href, accessToken, {
         method: link.method,
         headers: {
@@ -179,7 +179,6 @@ export function useEntries() {
   };
 
   const deleteEntry = async (link: Link): Promise<boolean> => {
-    if (!accessToken) return false;
     if (link.rel !== 'delete' || link.method !== 'DELETE') {
       throw new Error('Invalid operation: Link does not support deleting entry');
     }
@@ -188,6 +187,7 @@ export function useEntries() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       await fetchWithAuth(link.href, accessToken, {
         method: link.method,
       });
@@ -201,7 +201,6 @@ export function useEntries() {
   };
 
   const archiveEntry = async (link: Link): Promise<boolean> => {
-    if (!accessToken) return false;
     if (link.rel !== 'archive' || link.method !== 'PUT') {
       throw new Error('Invalid operation: Link does not support archiving entry');
     }
@@ -210,6 +209,7 @@ export function useEntries() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       await fetchWithAuth(link.href, accessToken, {
         method: link.method,
       });
@@ -223,7 +223,6 @@ export function useEntries() {
   };
 
   const unarchiveEntry = async (link: Link): Promise<boolean> => {
-    if (!accessToken) return false;
     if (link.rel !== 'un-archive' || link.method !== 'PUT') {
       throw new Error('Invalid operation: Link does not support unarchiving entry');
     }
@@ -232,6 +231,7 @@ export function useEntries() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       await fetchWithAuth(link.href, accessToken, {
         method: link.method,
       });

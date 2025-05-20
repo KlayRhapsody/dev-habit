@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { HiBars3, HiBell, HiChevronDown } from 'react-icons/hi2';
 import ProfileDropdown from './ProfileDropdown';
 import { HiCode } from 'react-icons/hi';
+import { useAuth0 } from '@auth0/auth0-react';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -10,6 +11,7 @@ interface NavbarProps {
 
 const Navbar = ({ onMenuClick }: NavbarProps) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { user } = useAuth0();
 
   return (
     <nav className="bg-white border-b border-gray-200 px-4 py-2.5">
@@ -34,7 +36,11 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg"
             >
-              <img src="/default-avatar.webp" alt="Profile" className="w-8 h-8 rounded-full" />
+              <img
+                src={user?.picture || '/default-avatar.webp'}
+                alt={user?.name || 'Profile'}
+                className="w-8 h-8 rounded-full"
+              />
               <HiChevronDown className="w-4 h-4" />
             </button>
 

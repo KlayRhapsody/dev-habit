@@ -1,4 +1,4 @@
-import { useAuth } from '../../context/AuthContext';
+import { useAuth0 } from '@auth0/auth0-react';
 import { fetchWithAuth } from '../../utils/fetchUtils';
 import { API_BASE_URL } from '../../api/config';
 import type { HateoasResponse, Link } from '../../types/api';
@@ -12,12 +12,11 @@ export interface UserProfile extends HateoasResponse {
 }
 
 export function useUsers() {
-  const { accessToken } = useAuth();
+  const { getAccessTokenSilently } = useAuth0();
 
   const getProfile = async (): Promise<UserProfile | null> => {
-    if (!accessToken) return null;
-
     try {
+      const accessToken = await getAccessTokenSilently();
       return await fetchWithAuth<UserProfile>(`${API_BASE_URL}/users/me`, accessToken, {
         headers: {
           Accept: 'application/vnd.dev-habit.hateoas+json',
@@ -30,12 +29,12 @@ export function useUsers() {
   };
 
   const updateProfile = async (name: string, link: Link): Promise<boolean> => {
-    if (!accessToken) throw new Error('Not authenticated');
     if (link.rel !== 'update-profile' || link.method !== 'PUT') {
       throw new Error('Invalid operation: Link does not support profile update');
     }
 
     try {
+      const accessToken = await getAccessTokenSilently();
       await fetchWithAuth<UserProfile>(link.href, accessToken, {
         method: link.method,
         headers: {

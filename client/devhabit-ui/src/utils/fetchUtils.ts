@@ -1,20 +1,4 @@
-import { refresh } from '../api/auth';
-
 type RequestInit = Parameters<typeof fetch>[1];
-
-// Create a store for the auth context handlers
-type AuthContextHandlers = {
-  getAccessToken: () => string | null;
-  getRefreshToken: () => string | null;
-  onTokenRefreshed: (accessToken: string, refreshToken: string) => void;
-};
-
-let authHandlers: AuthContextHandlers | null = null;
-
-// Function to initialize the auth handlers
-export function initializeAuthHandlers(handlers: AuthContextHandlers) {
-  authHandlers = handlers;
-}
 
 interface ProblemDetails {
   type?: string;
@@ -58,33 +42,6 @@ export async function fetchWithAuth<T>(
       ...options.headers,
     },
   });
-
-  // Handle 401 Unauthorized error
-  if (response.status === 401) {
-    try {
-      if (!authHandlers) {
-        throw new Error('Auth handlers not initialized');
-      }
-
-      const refreshToken = authHandlers.getRefreshToken();
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
-
-      // Attempt to refresh the token
-      const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-        await refresh(refreshToken);
-
-      // Update tokens in context
-      authHandlers.onTokenRefreshed(newAccessToken, newRefreshToken);
-
-      // Retry the original request with the new token
-      return fetchWithAuth<T>(url, newAccessToken, options);
-    } catch {
-      // If refresh fails, throw unauthorized error
-      throw new Error('Session expired. Please login again.');
-    }
-  }
 
   if (!response.ok) {
     // Try to get error message from response

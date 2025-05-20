@@ -1,18 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { HiUser, HiCog8Tooth, HiArrowRightOnRectangle } from 'react-icons/hi2';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const ProfileDropdown = () => {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
+  const { logout } = useAuth0();
 
-  const handleLogout = async () => {
-    try {
-      logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Failed to logout:', error);
-    }
+  const handleLogout = () => {
+    logout({ logoutParams: { returnTo: window.location.origin } });
   };
 
   return (

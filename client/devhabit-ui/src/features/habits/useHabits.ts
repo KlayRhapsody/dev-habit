@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth0 } from '@auth0/auth0-react';
 import { API_BASE_URL } from '../../api/config';
 import { CreateHabitDto, Habit, UpdateHabitDto } from './types';
 import { fetchWithAuth } from '../../utils/fetchUtils';
@@ -18,7 +18,7 @@ interface ListHabitsParams {
 }
 
 export function useHabits() {
-  const { accessToken } = useAuth();
+  const { getAccessTokenSilently } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,11 +28,11 @@ export function useHabits() {
     sort,
     url,
   }: ListHabitsParams = {}): Promise<HabitsResponse | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<HabitsResponse>(
         url ||
           `${API_BASE_URL}/habits?pageSize=${pageSize}${fields ? `&fields=${fields}` : ''}${sort ? `&sort=${sort}` : ''}`,
@@ -53,7 +53,6 @@ export function useHabits() {
   };
 
   const getHabit = async (link: Link): Promise<Habit | null> => {
-    if (!accessToken) return null;
     if (link.rel !== 'self' || link.method !== 'GET') {
       throw new Error('Invalid operation: Link does not support fetching habit');
     }
@@ -62,6 +61,7 @@ export function useHabits() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<Habit>(link.href, accessToken, {
         headers: {
           Accept: 'application/vnd.dev-habit.hateoas+json',
@@ -77,7 +77,6 @@ export function useHabits() {
   };
 
   const updateHabit = async (link: Link, data: UpdateHabitDto): Promise<boolean> => {
-    if (!accessToken) return false;
     if (link.rel !== 'update' || link.method !== 'PUT') {
       throw new Error('Invalid operation: Link does not support updating habit');
     }
@@ -86,6 +85,7 @@ export function useHabits() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       await fetchWithAuth<Habit>(link.href, accessToken, {
         method: link.method,
         headers: {
@@ -103,11 +103,11 @@ export function useHabits() {
   };
 
   const createHabit = async (data: CreateHabitDto): Promise<Habit | null> => {
-    if (!accessToken) return null;
     setIsLoading(true);
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       const result = await fetchWithAuth<Habit>(`${API_BASE_URL}/habits`, accessToken, {
         method: 'POST',
         headers: {
@@ -127,7 +127,6 @@ export function useHabits() {
   };
 
   const deleteHabit = async (link: Link): Promise<boolean> => {
-    if (!accessToken) return false;
     if (link.rel !== 'delete' || link.method !== 'DELETE') {
       throw new Error('Invalid operation: Link does not support deleting habit');
     }
@@ -136,6 +135,7 @@ export function useHabits() {
     setError(null);
 
     try {
+      const accessToken = await getAccessTokenSilently();
       await fetchWithAuth<Habit>(link.href, accessToken, {
         method: link.method,
       });
