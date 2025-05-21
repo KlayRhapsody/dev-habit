@@ -279,12 +279,14 @@ public static class DependencyInjection
             })
             .AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidIssuer = jwtAuthOptions.Issuer,
-                    ValidAudience = jwtAuthOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.Key))
-                };
+                options.Authority = jwtAuthOptions.Authority;
+                options.Audience = jwtAuthOptions.Audience;
+                // options.TokenValidationParameters = new TokenValidationParameters
+                // {
+                //     ValidIssuer = jwtAuthOptions.Issuer,
+                //     ValidAudience = jwtAuthOptions.Audience,
+                //     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.Key))
+                // };
             });
         
         builder.Services.AddAuthorization();
