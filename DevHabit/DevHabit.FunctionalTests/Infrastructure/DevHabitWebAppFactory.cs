@@ -30,6 +30,8 @@ public sealed class DevHabitWebAppFactory : WebApplicationFactory<Program>, IAsy
         builder.UseSetting("Github:BaseUrl", _wireMockServer.Urls[0]);
         builder.UseSetting("Encryption:Key", Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)));
         Quartz.Logging.LogContext.SetCurrentLogProvider(NullLoggerFactory.Instance);
+
+        builder.UseSetting("Jwt:ExternalAuth", "false");
     }
 
     public async Task InitializeAsync()
