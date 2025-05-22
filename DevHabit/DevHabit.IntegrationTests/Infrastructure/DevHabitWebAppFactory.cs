@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Testcontainers.PostgreSql;
 using WireMock.Server;
 
+
 namespace DevHabit.IntegrationTests.Infrastructure;
 
 public sealed class DevHabitWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
@@ -33,6 +34,8 @@ public sealed class DevHabitWebAppFactory : WebApplicationFactory<Program>, IAsy
 
         builder.UseSetting("Encryption:Key", Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)));
         Quartz.Logging.LogContext.SetCurrentLogProvider(NullLoggerFactory.Instance);
+
+        builder.UseSetting("Jwt:ExternalAuth", "false");
     }
 
     public async Task InitializeAsync()

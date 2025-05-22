@@ -9,4 +9,5 @@ public sealed class JwtAuthOptions
     public string Key { get; init; }
     public int ExpirationInMinutes { get; init; }
     public int RefreshTokenExpirationInDays { get; init; }
+    public bool ExternalAuth { get; init; }
 }
