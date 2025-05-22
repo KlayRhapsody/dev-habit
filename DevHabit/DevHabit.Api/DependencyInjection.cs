@@ -282,15 +282,15 @@ public static class DependencyInjection
                 if (jwtAuthOptions.ExternalAuth)
                 {
                     options.Authority = jwtAuthOptions.Authority;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = jwtAuthOptions.Authority,
+                    // options.TokenValidationParameters = new TokenValidationParameters
+                    // {
+                    //     ValidateIssuer = true,
+                    //     ValidIssuer = jwtAuthOptions.Authority,
 
-                        ValidateAudience = true,
-                        AudienceValidator = (audiences, _, _) =>
-                            audiences != null && audiences.Contains(jwtAuthOptions.Audience),
-                    };
+                    //     ValidateAudience = true,
+                    //     AudienceValidator = (audiences, _, _) =>
+                    //         audiences != null && audiences.Contains(jwtAuthOptions.Audience),
+                    // };
                 }
                 else
                 {
